@@ -1,7 +1,7 @@
 #pragma once
 
-#include "include/actor.hpp"
-#include "include/object.hpp"
+#include "actor.hpp"
+#include "object.hpp"
 
 
 class transaction {

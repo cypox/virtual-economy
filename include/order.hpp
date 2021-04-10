@@ -1,12 +1,12 @@
 #pragma once
 
-#include "include/object.hpp"
-#include "include/actor.hpp"
+#include "object.hpp"
+#include "actor.hpp"
 
 #include <set>
 
 
-using order_list = std::set<order>;
+typedef std::set<order> order_list;
 
 enum order_type {
   BUY = 1,
