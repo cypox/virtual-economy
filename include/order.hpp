@@ -2,7 +2,6 @@
 
 #include "object.hpp"
 
-//#include <stdexcept>
 #include <set>
 
 
@@ -16,7 +15,8 @@ enum order_type {
 
 class order {
 public:
-  order(order_type type, unsigned quantity, double strike, object_id obj, actor_id actor) : m_type(type), m_quantity(quantity), m_strike(strike), m_object_id(obj), m_actor_id(actor) { };
+  order() : m_valid(false) { };
+  order(order_type type, unsigned quantity, double strike, object_id obj, actor_id actor) : m_type(type), m_quantity(quantity), m_strike(strike), m_object_id(obj), m_actor_id(actor), m_valid(true) { };
 
   bool operator<(const order& lhs) const
   {
@@ -32,6 +32,7 @@ public:
   double get_strike() const { return m_strike; };
   object_id get_object_id() const { return m_object_id; };
   actor_id get_actor_id() const { return m_actor_id; };
+  bool is_valid() const { return m_valid; };
 
 private:
   order_type m_type;
@@ -39,6 +40,7 @@ private:
   double m_strike;
   object_id m_object_id;
   actor_id m_actor_id;
+  bool m_valid;
 };
 
 typedef std::set<order> order_list;
