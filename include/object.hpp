@@ -1,17 +1,13 @@
 #pragma once
 
-using object_id = unsigned;
 
+using object_id = unsigned;
 
 class object {
 public:
   object() = delete;
 
-  object(object_id id)
-  {
-    m_id = id;
-    m_price = 0.0;
-  }
+  object(object_id id) : m_id(id), m_price(0.0) { };
 
   double get_price() const
   {
