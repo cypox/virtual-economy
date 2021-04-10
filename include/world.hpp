@@ -55,6 +55,11 @@ public:
     actor_id buyer = tr.get_buyer();
     actor_id seller = tr.get_seller();
 
+    if (buyer == -1 || seller == -1)
+    {
+      return;
+    }
+
     m_actors[buyer].execute_buy(tr.get_object(), tr.get_quantity(), tr.get_price());
     m_actors[seller].execute_sell(tr.get_object(), tr.get_quantity(), tr.get_price());
   }

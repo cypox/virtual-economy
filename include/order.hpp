@@ -20,9 +20,9 @@ public:
 
   bool operator<(const order& lhs) const
   {
-    if (m_type != lhs.get_type() || m_object_id != lhs.get_object_id() || m_id != lhs.get_actor_id())
+    if (m_strike == lhs.get_strike())
     {
-      return false;
+      return m_actor_id < lhs.get_actor_id();
     }
     return m_strike < lhs.get_strike();
   }

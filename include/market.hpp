@@ -94,5 +94,4 @@ private:
   std::queue<order> m_order_queue;
   std::map<object_id, order_list> m_buy_orders;
   std::map<object_id, order_list> m_sell_orders;
-  std::set<object_id> m_goods;
 };
