@@ -61,7 +61,7 @@ public:
       auto it = market_orders.begin();
       while(it != market_orders.end())
       {
-        order& current_order = *it;
+        const order& current_order = *it;
         if (current_order.get_strike() <= to_satisfy.get_strike())
         {
           actor_id second = current_order.get_actor_id();
@@ -77,11 +77,11 @@ public:
       auto it = market_orders.rbegin();
       while(it != market_orders.rend())
       {
-        order& current_order = *it;
+        const order& current_order = *it;
         if (current_order.get_strike() >= to_satisfy.get_strike())
         {
           actor_id second = current_order.get_actor_id();
-          m_buy_orders[to_satisfy.get_object_id()].erase(it);
+          m_buy_orders[to_satisfy.get_object_id()].erase(std::next(it).base());
           return execute_order(to_satisfy, second);
         }
       }

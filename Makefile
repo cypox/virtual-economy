@@ -1,5 +1,5 @@
 CC = g++
-CFLAGS = -g
+CFLAGS = -g -std=c++2a
 SRC_DIR = src
 INC_DIR = .
 

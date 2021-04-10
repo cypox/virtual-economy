@@ -1,12 +1,13 @@
 #pragma once
 
 #include "object.hpp"
-#include "actor.hpp"
 
+//#include <stdexcept>
 #include <set>
 
 
-typedef std::set<order> order_list;
+typedef unsigned object_id;
+typedef unsigned actor_id;
 
 enum order_type {
   BUY = 1,
@@ -17,13 +18,13 @@ class order {
 public:
   order(order_type type, unsigned quantity, double strike, object_id obj, actor_id actor) : m_type(type), m_quantity(quantity), m_strike(strike), m_object_id(obj), m_actor_id(actor) { };
 
-  bool operator<(const order& b)
+  bool operator<(const order& lhs) const
   {
-    if (m_type != b.get_type() || m_object_id != b.get_object_id())
+    if (m_type != lhs.get_type() || m_object_id != lhs.get_object_id() || m_id != lhs.get_actor_id())
     {
-      throw std::logic_error("comparing two unequivalent orders");
+      return false;
     }
-    return m_strike < b.get_strike();
+    return m_strike < lhs.get_strike();
   }
 
   order_type get_type() const { return m_type; };
@@ -39,3 +40,5 @@ private:
   object_id m_object_id;
   actor_id m_actor_id;
 };
+
+typedef std::set<order> order_list;

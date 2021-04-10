@@ -7,7 +7,7 @@ class object {
 public:
   object() = delete;
 
-  object(object_id id) : m_id(id), m_price(0.0) { };
+  object(object_id id, double price) : m_id(id), m_price(price) { };
 
   double get_price() const
   {

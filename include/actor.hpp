@@ -6,7 +6,7 @@
 #include <map>
 
 
-using actor_id = unsigned;
+typedef unsigned actor_id;
 
 class actor {
 public:
@@ -21,7 +21,7 @@ public:
 
   void step(order_list& order_list)
   {
-    order test = place_order(0, 1, 10, order_type::BUY);
+    order test = place_order(0, 1, 10.0, order_type::BUY);
     order_list.insert(test);
   }
 

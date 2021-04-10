@@ -16,14 +16,16 @@ public:
     m_objects.reserve(3);
     for (int i = 0 ; i < 3 ; ++ i)
     {
-      double price = (rand() / RAND_MAX) * 10;
-      m_actors.emplace_back(i, price);
+      double x = rand();
+      double price = (x / RAND_MAX) * 10.0;
+      m_objects.emplace_back(i, price);
     }
 
     m_actors.reserve(pop_size);
     for (int i = 0 ; i < 10 ; ++ i)
     {
-      double cash = (rand() / RAND_MAX) * std::numeric_limits<double>::max();
+      double x = rand();
+      double cash = ((double)x / RAND_MAX) * std::numeric_limits<double>::max();
       m_actors.emplace_back(i, cash);
       for (object obj : m_objects)
       {
