@@ -2,17 +2,35 @@
 
 class pop {
 public:
-  pop();
+  pop()
+  {
+    m_size = 0;
+  }
 
-  void feed();
+  void feed()
+  {
+    printf("feeding\n");
+  }
 
-  void work();
+  void work()
+  {
+    printf("working\n");
+  }
 
-  void trade();
+  void trade()
+  {
+    printf("trading\n");
+  }
 
-  unsigned get_size() const;
+  unsigned get_size() const
+  {
+    return m_size;
+  }
 
-  void set_size(unsigned);
+  void set_size(unsigned size)
+  {
+    m_size = size;
+  }
 
 private:
   unsigned m_size;
