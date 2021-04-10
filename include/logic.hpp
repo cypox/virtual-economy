@@ -17,7 +17,7 @@ public:
   {
     for (const object& obj : m_world->get_objects())
     {
-      object_id obj_id;
+      object_id obj_id = obj.get_id();
       m_actor->destroy(obj_id, m_consumption_rate);
       unsigned own = m_actor->get_stock(obj_id);
       double price = m_world->get_price(obj_id);

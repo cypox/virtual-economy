@@ -6,6 +6,7 @@
 
 int main(int argc, char** argv)
 {
+  /*
   sf::RenderWindow window(sf::VideoMode(200, 200), "SFML works!");
   sf::CircleShape shape(100.f);
   shape.setFillColor(sf::Color::Green);
@@ -23,6 +24,7 @@ int main(int argc, char** argv)
     window.draw(shape);
     window.display();
   }
+  */
 
   std::cout << "virtual-economy" << std::endl;
   world<basic_logic> w;
