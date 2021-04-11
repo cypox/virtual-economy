@@ -38,7 +38,7 @@ public:
 
   void generate_random_world()
   {
-    setup_rng();
+    setup_rng(1618169463);
 
     m_objects.reserve(3);
     m_produce_consume_rates.reserve(3);
@@ -85,22 +85,35 @@ public:
     m_time++;
   }
 
-  void settle()
+  bool settle()
   {
     if (m_last_transaction.is_empty())
     {
-      return;
+      return false;
     }
 
     actor_id buyer = m_last_transaction.get_buyer();
     actor_id seller = m_last_transaction.get_seller();
 
-    m_actors[buyer].execute_buy(m_last_transaction.get_object(), m_last_transaction.get_quantity(), m_last_transaction.get_price());
-    m_actors[seller].execute_sell(m_last_transaction.get_object(), m_last_transaction.get_quantity(), m_last_transaction.get_price());
+    bool success = true;
 
-    m_objects[m_last_transaction.get_object()].set_price(m_last_transaction.get_price());
+    success = m_actors[buyer].execute_buy(m_last_transaction.get_object(), m_last_transaction.get_quantity(), m_last_transaction.get_price());
+    if (success)
+    {
+      success = m_actors[seller].execute_sell(m_last_transaction.get_object(), m_last_transaction.get_quantity(), m_last_transaction.get_price());
+    }
 
-    m_last_transaction.clear();
+    if (success)
+    {
+      m_objects[m_last_transaction.get_object()].set_price(m_last_transaction.get_price());
+      m_last_transaction.clear();
+    }
+    else
+    {
+      throw std::runtime_error("cannot settle");
+    }
+
+    return success;
   }
 
   void render()

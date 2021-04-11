@@ -54,12 +54,19 @@ public:
             break;
 
           case sf::Event::KeyPressed:
-            if (event.key.code == sf::Keyboard::S)
+            switch (event.key.code)
             {
-              if (m_world.is_running())
-                m_world.stop();
-              else
-                m_world.start();
+              case sf::Keyboard::S:
+                if (m_world.is_running())
+                  m_world.stop();
+                else
+                  m_world.start();
+                break;
+              case sf::Keyboard::Q:
+                m_window.close();
+                if (!m_world.is_running())
+                  m_world.start();
+                break;
             }
             break;
 

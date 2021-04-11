@@ -106,25 +106,17 @@ public:
   bool execute_buy(object_id obj, unsigned quantity, double price)
   {
     double total_price = price * quantity;
-    if (m_cash >= total_price)
-    {
-      m_reserved_cash -= total_price;
-      m_stock[obj] += quantity;
-      return true;
-    }
-    return false;
+    m_reserved_cash -= total_price;
+    m_stock[obj] += quantity;
+    return m_reserved_cash >= 0;
   }
 
   bool execute_sell(object_id obj, unsigned quantity, double price)
   {
-    if (m_reserve[obj] >= quantity)
-    {
-      double total_price = price * quantity;
-      m_cash += total_price;
-      m_reserve[obj] -= quantity;
-      return true;
-    }
-    throw std::runtime_error("cannot execute sell");
+    double total_price = price * quantity;
+    m_cash += total_price;
+    m_reserve[obj] -= quantity;
+    return m_reserve[obj] >= 0;
   }
 
   void render() const
@@ -145,7 +137,7 @@ private:
   double m_cash;
   double m_reserved_cash;
   size_t m_remaining_storage;
-  std::map<object_id, unsigned> m_stock;
-  std::map<object_id, unsigned> m_reserve;
+  std::map<object_id, int> m_stock;
+  std::map<object_id, int> m_reserve;
   logic m_logic;
 };

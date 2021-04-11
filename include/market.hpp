@@ -31,21 +31,25 @@ public:
     m_order_queue.push(o);
   }
 
-  transaction execute_order(const order& to_satisfy, actor_id second)
+  transaction execute_order(const order& to_satisfy, order second_order)
   {
+    if (to_satisfy.get_quantity() != second_order.get_quantity())
+    {
+      throw std::runtime_error("different quantities settlments are not implemented yet");
+    }
     actor_id seller;
     actor_id buyer;
     if (to_satisfy.get_type() == order_type::BUY)
     {
-      seller = second;
+      seller = second_order.get_actor_id();
       buyer = to_satisfy.get_actor_id();
     }
     else if (to_satisfy.get_type() == order_type::SELL)
     {
       seller = to_satisfy.get_actor_id();
-      buyer = second;
+      buyer = second_order.get_actor_id();
     }
-    return transaction(buyer, seller, to_satisfy.get_object_id(), to_satisfy.get_quantity(), to_satisfy.get_strike());
+    return transaction(buyer, seller, to_satisfy.get_object_id(), to_satisfy.get_quantity(), second_order.get_strike());
   }
 
   transaction process_single_order()
@@ -64,12 +68,12 @@ public:
       auto it = market_orders.begin();
       while(it != market_orders.end())
       {
-        const order& current_order = *it;
+        const order current_order = *it;
         if (current_order.get_strike() <= to_satisfy.get_strike())
         {
           actor_id second = current_order.get_actor_id();
           market_orders.erase(it);
-          return execute_order(to_satisfy, second);
+          return execute_order(to_satisfy, current_order);
         }
         it ++;
       }
@@ -81,12 +85,12 @@ public:
       auto it = market_orders.rbegin();
       while(it != market_orders.rend())
       {
-        const order& current_order = *it;
+        const order current_order = *it;
         if (current_order.get_strike() >= to_satisfy.get_strike())
         {
           actor_id second = current_order.get_actor_id();
           market_orders.erase(std::next(it).base());
-          return execute_order(to_satisfy, second);
+          return execute_order(to_satisfy, current_order);
         }
         it ++;
       }
