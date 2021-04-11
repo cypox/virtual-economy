@@ -11,9 +11,9 @@
 
 class market {
 public:
-  market() { }
+  market(unsigned execution_rate = 10) : m_execution_rate(execution_rate) { }
 
-  void step(const order_list& orders, transaction& tr)
+  void step(const order_list& orders, std::queue<transaction>& tr_list)
   {
     for (order ord : orders)
     {
@@ -22,7 +22,12 @@ public:
 
     if (!m_order_queue.empty())
     {
-      tr = process_single_order();
+      for (int i = 0 ; i < m_execution_rate && !m_order_queue.empty() ; ++ i)
+      {
+        order to_satisfy = m_order_queue.front();
+        m_order_queue.pop();
+        tr_list.push(process_single_order(to_satisfy));
+      }
     }
   }
 
@@ -52,11 +57,8 @@ public:
     return transaction(buyer, seller, to_satisfy.get_object_id(), to_satisfy.get_quantity(), second_order.get_strike());
   }
 
-  transaction process_single_order()
+  transaction process_single_order(const order& to_satisfy)
   {
-    order to_satisfy = m_order_queue.front();
-    m_order_queue.pop();
-
     if (to_satisfy.get_quantity() != 1)
     {
       throw std::runtime_error("orders with quantity!=1 are not yet implemented");
@@ -121,4 +123,5 @@ private:
   std::queue<order> m_order_queue;
   std::map<object_id, order_list> m_buy_orders;
   std::map<object_id, order_list> m_sell_orders;
+  unsigned m_execution_rate;
 };

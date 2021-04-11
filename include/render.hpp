@@ -104,6 +104,21 @@ public:
     return text;
   }
 
+  void render_information(sf::Vector2f position)
+  {
+    std::stringstream ss("press:");
+    m_window.draw(prepare_text(ss.str(), position));
+    position.y += 16;
+    ss.str("p ==> stepping mode");
+    m_window.draw(prepare_text(ss.str(), position));
+    position.y += 16;
+    ss.str("s ==> start/stop simulation");
+    m_window.draw(prepare_text(ss.str(), position));
+    position.y += 16;
+    ss.str("r ==> resume simulation after stepping mode");
+    m_window.draw(prepare_text(ss.str(), position));
+  }
+
   void render_time(sf::Vector2f position)
   {
     std::stringstream ss;
@@ -162,6 +177,8 @@ public:
     sf::RectangleShape shape(sf::Vector2f(800.f, 600.f));
     shape.setFillColor(sf::Color::White);
     m_window.draw(shape);
+
+    render_information(sf::Vector2f(20.f, 520.f));
 
     render_world_time(sf::Vector2f(20.f, 20.f));
 

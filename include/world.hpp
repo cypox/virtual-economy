@@ -5,6 +5,7 @@
 #include "market.hpp"
 
 #include <vector>
+#include <queue>
 #include <random>
 #include <limits>
 #include <mutex>
@@ -86,35 +87,38 @@ public:
       act.step(order_list);
     }
 
-    m_exchange.step(order_list, m_last_transaction);
+    m_exchange.step(order_list, m_last_transactions);
 
-    settle();
+    while(!m_last_transactions.empty())
+    {
+      settle(m_last_transactions.front());
+      m_last_transactions.pop();
+    }
 
     m_time++;
   }
 
-  bool settle()
+  bool settle(const transaction& t)
   {
-    if (m_last_transaction.is_empty())
+    if (t.is_empty())
     {
       return false;
     }
 
-    actor_id buyer = m_last_transaction.get_buyer();
-    actor_id seller = m_last_transaction.get_seller();
+    actor_id buyer = t.get_buyer();
+    actor_id seller = t.get_seller();
 
     bool success = true;
 
-    success = m_actors[buyer].execute_buy(m_last_transaction.get_object(), m_last_transaction.get_quantity(), m_last_transaction.get_price());
+    success = m_actors[buyer].execute_buy(t.get_object(), t.get_quantity(), t.get_price());
     if (success)
     {
-      success = m_actors[seller].execute_sell(m_last_transaction.get_object(), m_last_transaction.get_quantity(), m_last_transaction.get_price());
+      success = m_actors[seller].execute_sell(t.get_object(), t.get_quantity(), t.get_price());
     }
 
     if (success)
     {
-      m_objects[m_last_transaction.get_object()].set_price(m_last_transaction.get_price());
-      m_last_transaction.clear();
+      m_objects[t.get_object()].set_price(t.get_price());
     }
     else
     {
@@ -138,8 +142,6 @@ public:
     }
     printf("Exchange:\n");
     m_exchange.render();
-    printf("Transactions:\n");
-    m_last_transaction.render();
   }
 
   const std::vector<actor<logic>>& get_actors() const { return m_actors; }
@@ -203,7 +205,7 @@ private:
   std::vector<object> m_objects;
   std::vector<double> m_produce_consume_rates;
   market m_exchange;
-  transaction m_last_transaction;
+  std::queue<transaction> m_last_transactions;
 
   bool m_running;
   bool m_stepping;
