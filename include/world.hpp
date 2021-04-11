@@ -27,8 +27,9 @@ class world {
 public:
   world()
   {
-    m_stepping = true;
+    m_running = true;
     m_block_mtx.lock();
+    m_stepping_mtx.lock();
   }
 
   void init()
@@ -66,9 +67,14 @@ public:
 
   void step()
   {
-    if (!m_stepping)
+    if (!m_running)
     {
       m_block_mtx.lock();
+    }
+
+    if (m_stepping)
+    {
+      m_stepping_mtx.lock();
     }
 
     order_list order_list;
@@ -144,21 +150,50 @@ public:
 
   unsigned get_time() const { return m_time; }
 
-  bool is_running() const { return m_stepping; }
+  bool is_running() const { return m_running; }
+
+  bool is_stepping() const { return m_stepping; }
 
   void stop()
   {
-    m_stepping_mtx.lock();
-    m_stepping = false;
-    m_stepping_mtx.unlock();
+    m_running_mtx.lock();
+    m_running = false;
+    m_running_mtx.unlock();
   }
 
   void start()
   {
-    m_stepping_mtx.lock();
-    m_stepping = true;
-    m_stepping_mtx.unlock();
+    m_running_mtx.lock();
+    m_running = true;
+    m_running_mtx.unlock();
     m_block_mtx.unlock();
+  }
+
+  void next_step()
+  {
+    if (m_running)
+    {
+      if (!m_stepping)
+      {
+        m_stepping = true;
+      }
+      m_stepping_mtx.unlock();
+    }
+  }
+
+  void disable_stepping()
+  {
+    m_stepping = false;
+    m_stepping_mtx.unlock();
+  }
+
+  void unlock_mtx()
+  {
+    if (!m_running)
+    {
+      m_block_mtx.unlock();
+    }
+    m_stepping_mtx.unlock();
   }
 
 private:
@@ -168,8 +203,10 @@ private:
   market m_exchange;
   transaction m_last_transaction;
 
-  bool m_stepping = true;
+  bool m_running = true;
+  bool m_stepping = false;
   unsigned m_time = 0;
-  std::mutex m_stepping_mtx;
+  std::mutex m_running_mtx;
   std::mutex m_block_mtx;
+  std::mutex m_stepping_mtx;
 };

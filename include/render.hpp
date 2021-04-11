@@ -64,8 +64,12 @@ public:
                 break;
               case sf::Keyboard::Q:
                 m_window.close();
-                if (!m_world.is_running())
-                  m_world.start();
+                m_world.unlock_mtx();
+              case sf::Keyboard::P:
+                m_world.next_step();
+                break;
+              case sf::Keyboard::R:
+                m_world.disable_stepping();
                 break;
             }
             break;
