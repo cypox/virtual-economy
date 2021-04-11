@@ -181,6 +181,27 @@ public:
     m_window.draw(prepare_text(ss.str(), position));
   }
 
+  void render_market(sf::Vector2f position)
+  {
+    std::stringstream ss;
+    for (auto o : m_world.get_objects())
+    {
+      object_id oid = o.get_id();
+      auto order_map = m_world.get_market().get_buy_order_list();
+      int buy_size = 0;
+      if (order_map.count(oid) > 0)
+        buy_size = m_world.get_market().get_buy_order_list().at(oid).size();
+      order_map = m_world.get_market().get_sell_order_list();
+      int sell_size = 0;
+      if (order_map.count(oid) > 0)
+        sell_size = m_world.get_market().get_sell_order_list().at(oid).size();
+      ss.str("");
+      ss << "object " << oid << " has " << buy_size << " buyers and " << sell_size << " sellers";
+      m_window.draw(prepare_text(ss.str(), position));
+      position.y += 16;
+    }
+  }
+
   void render_world()
   {
     sf::RectangleShape shape(sf::Vector2f(800.f, 600.f));
@@ -193,7 +214,9 @@ public:
 
     render_object_prices(sf::Vector2f(20.f, 60.f));
 
-    render_actors(sf::Vector2f(200.f, 20.f));
+    render_actors(sf::Vector2f(400.f, 20.f));
+
+    render_market(sf::Vector2f(20.f, 160.f));
 
     render_time(sf::Vector2f(690.f, 580.f));
   }

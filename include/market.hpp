@@ -162,6 +162,10 @@ public:
     }
   }
 
+  const std::queue<order>& get_order_queue() const { return m_order_queue; };
+  const std::map<object_id, order_list>& get_buy_order_list() const { return m_buy_orders; };
+  const std::map<object_id, order_list>& get_sell_order_list() const { return m_sell_orders; };
+
 private:
   std::queue<order> m_order_queue;
   std::map<object_id, order_list> m_buy_orders;

@@ -199,6 +199,8 @@ public:
     m_stepping_mtx.unlock();
   }
 
+  const market& get_market() const { return m_exchange; };
+
 private:
   std::vector<actor<logic>> m_actors;
   std::vector<object> m_objects;
