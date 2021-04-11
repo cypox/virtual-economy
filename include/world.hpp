@@ -25,11 +25,13 @@ T generate_random_number(T min, T max)
 template<class logic>
 class world {
 public:
-  world()
+  world(bool running = false, bool stepping = true) : m_running(running), m_stepping(stepping)
   {
-    m_running = true;
     m_block_mtx.lock();
-    m_stepping_mtx.lock();
+    if (m_stepping)
+    {
+      m_stepping_mtx.lock();
+    }
   }
 
   void init()
@@ -203,8 +205,8 @@ private:
   market m_exchange;
   transaction m_last_transaction;
 
-  bool m_running = true;
-  bool m_stepping = false;
+  bool m_running;
+  bool m_stepping;
   unsigned m_time = 0;
   std::mutex m_running_mtx;
   std::mutex m_block_mtx;
