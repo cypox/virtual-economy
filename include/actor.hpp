@@ -32,20 +32,21 @@ public:
     m_logic.take_decision(order_list);
   }
 
-  void acquire(object_id obj, unsigned quantity)
+  void create(object_id obj, unsigned quantity)
   {
     m_stock[obj] += quantity;
   }
 
-  void destroy(object_id obj, unsigned quantity)
+  bool destroy(object_id obj, unsigned quantity)
   {
     if (m_stock[obj] > quantity)
     {
       m_stock[obj] -= quantity;
     }
+    return m_stock[obj] == 0;
   }
 
-  order prepare_order(order_type type, unsigned quantity, double price, object_id obj)
+  order make_order(order_type type, unsigned quantity, double price, object_id obj)
   {
     if (type == order_type::SELL)
     {
@@ -75,21 +76,41 @@ public:
     return order(type, quantity, price, obj, m_id);
   }
 
-  void execute_buy(object_id obj, unsigned quantity, double price)
+  bool execute_buy(object_id obj, unsigned quantity, double price)
   {
     double total_price = price * quantity;
     if (m_cash >= total_price)
     {
       m_reserved_cash -= total_price;
       m_stock[obj] += quantity;
+      return true;
     }
+    return false;
   }
 
-  void execute_sell(object_id obj, unsigned quantity, double price)
+  bool execute_sell(object_id obj, unsigned quantity, double price)
   {
-    double total_price = price * quantity;
-    m_cash += total_price;
-    m_reserve[obj] -= quantity;
+    if (m_reserve[obj] >= quantity)
+    {
+      double total_price = price * quantity;
+      m_cash += total_price;
+      m_reserve[obj] -= quantity;
+      return true;
+    }
+    throw std::runtime_error("cannot execute sell");
+  }
+
+  void render() const
+  {
+    printf("%d have %.2f liquidity and %.2f in reserve with the following stock:\n", m_id, m_cash, m_reserved_cash);
+    for(auto s : m_stock)
+    {
+      printf("  %d with a quantity of %d in stock\n", s.first, s.second);
+    }
+    for(auto s : m_reserve)
+    {
+      printf("  %d with a quantity of %d in reserve\n", s.first, s.second);
+    }
   }
 
 private:

@@ -32,7 +32,7 @@ public:
   {
     actor_id seller;
     actor_id buyer;
-    if (to_satisfy.get_type() == order_type::SELL)
+    if (to_satisfy.get_type() == order_type::BUY)
     {
       seller = second;
       buyer = to_satisfy.get_actor_id();
@@ -65,7 +65,7 @@ public:
         if (current_order.get_strike() <= to_satisfy.get_strike())
         {
           actor_id second = current_order.get_actor_id();
-          m_sell_orders[to_satisfy.get_object_id()].erase(it);
+          market_orders.erase(it);
           return execute_order(to_satisfy, second);
         }
       }
@@ -81,13 +81,31 @@ public:
         if (current_order.get_strike() >= to_satisfy.get_strike())
         {
           actor_id second = current_order.get_actor_id();
-          m_buy_orders[to_satisfy.get_object_id()].erase(std::next(it).base());
+          market_orders.erase(std::next(it).base());
           return execute_order(to_satisfy, second);
         }
       }
       m_sell_orders[to_satisfy.get_object_id()].insert(to_satisfy);
     }
     return transaction();
+  }
+
+  void render()
+  {
+    for (auto ol : m_buy_orders)
+    {
+      for (auto o : ol.second)
+      {
+        o.render();
+      }
+    }
+    for (auto ol : m_sell_orders)
+    {
+      for (auto o : ol.second)
+      {
+        o.render();
+      }
+    }
   }
 
 private:

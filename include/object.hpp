@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstdio>
+
 
 using object_id = unsigned;
 
@@ -22,6 +24,11 @@ public:
   object_id get_id() const
   {
     return m_id;
+  }
+
+  void render() const
+  {
+    printf("%d has a current price of %f\n", m_id, m_price);
   }
 
 private:

@@ -9,5 +9,7 @@ SFML_LIBS = -lsfml-graphics -lsfml-window -lsfml-system
 veco: ${SRC_DIR}/veco.cpp
 	$(CC) $(CFLAGS) $(DEBUG) $(CPPFLAGS) -I$(INC_DIR) $< -o $@ $(SFML_LIBS)
 
+.PHONY: veco clean
+
 clean:
 	rm -f veco

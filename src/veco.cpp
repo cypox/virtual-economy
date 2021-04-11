@@ -32,6 +32,8 @@ int main(int argc, char** argv)
   while(true)
   {
     w.step();
+    w.render();
+    getchar();
   }
   return 0;
 }

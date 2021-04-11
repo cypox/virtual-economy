@@ -27,6 +27,11 @@ public:
     return m_strike < lhs.get_strike();
   }
 
+  void render()
+  {
+    printf("%d wants to %s %d of %d at %.2f\n", m_actor_id, m_type==order_type::BUY?"BUY":"SELL", m_quantity, m_object_id, m_strike);
+  }
+
   order_type get_type() const { return m_type; };
   unsigned get_quantity() const { return m_quantity; };
   double get_strike() const { return m_strike; };
