@@ -20,7 +20,10 @@ public:
       place_order(ord);
     }
 
-    tr = process_single_order();
+    if (!m_order_queue.empty())
+    {
+      tr = process_single_order();
+    }
   }
 
   void place_order(const order o)

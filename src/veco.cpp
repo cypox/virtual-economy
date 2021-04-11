@@ -29,11 +29,11 @@ int main(int argc, char** argv)
   std::cout << "virtual-economy" << std::endl;
   world<basic_logic> w;
   w.init();
-  while(true)
+  char c;
+  do
   {
     w.step();
     w.render();
-    getchar();
-  }
+  } while((c = getchar()) != 'q');
   return 0;
 }

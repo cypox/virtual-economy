@@ -9,9 +9,9 @@
 #include <limits>
 
 
-void setup_rng()
+void setup_rng(long seed = time(nullptr))
 {
-  srand(time(nullptr));
+  srand(seed);
 }
 
 template<class T>
