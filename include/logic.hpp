@@ -74,7 +74,7 @@ public:
       }
       else if (own >= m_liquidate_threshold && own < m_waste_threshold)
       {
-        double target_price = price * (1.0 + m_sell_margin_factor);
+        double target_price = price * (1.0 - m_sell_margin_factor);
         order o = m_actor->make_order(order_type::SELL, 1, target_price, obj_id);
         if (o.is_valid())
         {
