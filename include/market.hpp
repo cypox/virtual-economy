@@ -71,6 +71,7 @@ public:
           market_orders.erase(it);
           return execute_order(to_satisfy, second);
         }
+        it ++;
       }
       m_buy_orders[to_satisfy.get_object_id()].insert(to_satisfy);
     }
@@ -87,6 +88,7 @@ public:
           market_orders.erase(std::next(it).base());
           return execute_order(to_satisfy, second);
         }
+        it ++;
       }
       m_sell_orders[to_satisfy.get_object_id()].insert(to_satisfy);
     }

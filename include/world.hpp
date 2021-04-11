@@ -11,6 +11,7 @@
 
 void setup_rng(long seed = time(nullptr))
 {
+  printf("running with seed: %ld\n", seed);
   srand(seed);
 }
 

@@ -1,5 +1,6 @@
 #include "../include/veco.hpp"
 
+#include <sys/time.h>
 #include <iomanip>
 #include <sstream>
 #include <SFML/Graphics.hpp>
@@ -18,10 +19,21 @@ sf::Text prepare_text(const std::string& str, sf::Font& font, sf::Vector2f& posi
 
 char* get_time()
 {
+  int millisec;
+  struct timeval tv;
+  gettimeofday(&tv, NULL);
+
+  millisec = lrint(tv.tv_usec/1000.0);
+  if (millisec>=1000)
+  {
+    millisec -=1000;
+    tv.tv_sec++;
+  }
   std::time_t t = std::time(nullptr);
-  static char str[100];
-  std::strftime(str, sizeof(str), "%H:%M:%S", std::localtime(&t));
-  return str;
+  static char buffer[100];
+  std::strftime(buffer, sizeof(buffer), "%H:%M:%S", std::localtime(&t));
+  sprintf(buffer+8, ".%03d\n", millisec);
+  return buffer;
 }
 
 void render_world(sf::RenderWindow& window, world<basic_logic>& w)
@@ -56,7 +68,7 @@ int main(int argc, char** argv)
   world<basic_logic> simulation_world;
   simulation_world.init();
   sf::RenderWindow window(sf::VideoMode(800, 600), "VECO");
-  window.setFramerateLimit(10);
+  window.setFramerateLimit(15);
 
   while (window.isOpen())
   {
