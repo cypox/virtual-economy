@@ -17,7 +17,7 @@ public:
   {
     for (order ord : orders)
     {
-      place_order(ord);
+      m_order_queue.push(ord);
     }
 
     if (!m_order_queue.empty())
@@ -29,11 +29,6 @@ public:
         tr_list.push(process_single_order(to_satisfy));
       }
     }
-  }
-
-  void place_order(const order o)
-  {
-    m_order_queue.push(o);
   }
 
   transaction execute_order(const order& to_satisfy, order second_order)
