@@ -8,9 +8,10 @@ int main(int argc, char** argv)
   argument_parser parser(argc, argv);
   bool starts_running = parser.exists("--start-running");
   bool no_stepping = parser.exists("--no-stepping");
-  int framerate = parser.get_int("-f", 60);
+  int framerate = parser.get_int("--frame-rate", 60);
+  int rng_seed = parser.get_int("--seed", time(nullptr));
 
-  world_t simulation_world(starts_running || !no_stepping, !no_stepping);
+  world_t simulation_world(rng_seed, starts_running || !no_stepping, !no_stepping);
   simulation_world.init();
   sf::RenderWindow window(sf::VideoMode(800, 600), "VECO");
   window.setFramerateLimit(framerate);

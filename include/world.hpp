@@ -26,8 +26,9 @@ T generate_random_number(T min, T max)
 template<class logic>
 class world {
 public:
-  world(bool running = false, bool stepping = true) : m_running(running), m_stepping(stepping)
+  world(long seed, bool running = false, bool stepping = true) : m_running(running), m_stepping(stepping)
   {
+    setup_rng(seed);
     m_block_mtx.lock();
     if (m_stepping)
     {
@@ -42,8 +43,6 @@ public:
 
   void generate_random_world()
   {
-    setup_rng(1618169463);
-
     m_objects.reserve(3);
     m_produce_consume_rates.reserve(3);
     for (int i = 0 ; i < 3 ; ++ i)

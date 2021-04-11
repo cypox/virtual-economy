@@ -117,6 +117,9 @@ public:
     position.y += 16;
     ss.str("r ==> resume simulation after stepping mode");
     m_window.draw(prepare_text(ss.str(), position));
+    position.y += 16;
+    ss.str("q ==> exit");
+    m_window.draw(prepare_text(ss.str(), position));
   }
 
   void render_time(sf::Vector2f position)
@@ -146,8 +149,10 @@ public:
 
   void render_actors(sf::Vector2f position)
   {
+    double total_money = 0.f;
     for (auto actor : m_world.get_actors())
     {
+      total_money += actor.get_cash() + actor.get_reserved_cash();
       std::stringstream ss;
       ss << actor.get_id() << " : " << std::setprecision(8)
          << (unsigned)(actor.get_cash() + actor.get_reserved_cash()) << "$"
@@ -170,6 +175,10 @@ public:
       }
       position.x -= 16;
     }
+    position.y += 16;
+    std::stringstream ss;
+    ss << "total money is: " << total_money;
+    m_window.draw(prepare_text(ss.str(), position));
   }
 
   void render_world()
@@ -178,7 +187,7 @@ public:
     shape.setFillColor(sf::Color::White);
     m_window.draw(shape);
 
-    render_information(sf::Vector2f(20.f, 520.f));
+    render_information(sf::Vector2f(20.f, 510.f));
 
     render_world_time(sf::Vector2f(20.f, 20.f));
 

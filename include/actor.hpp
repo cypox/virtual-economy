@@ -108,6 +108,7 @@ public:
     double total_price = price * quantity;
     m_reserved_cash -= total_price;
     m_stock[obj] += quantity;
+    m_remaining_storage -= quantity;
     return m_reserved_cash >= 0;
   }
 
@@ -116,6 +117,7 @@ public:
     double total_price = price * quantity;
     m_cash += total_price;
     m_reserve[obj] -= quantity;
+    m_remaining_storage += quantity;
     return m_reserve[obj] >= 0;
   }
 
