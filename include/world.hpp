@@ -68,6 +68,8 @@ public:
     m_exchange.step(order_list, m_last_transaction);
 
     settle();
+
+    m_time++;
   }
 
   void settle()
@@ -112,10 +114,13 @@ public:
 
   double get_producers_consumers_rate(object_id oid) const { return m_produce_consume_rates[oid]; }
 
+  unsigned get_time() const { return m_time; }
+
 private:
   std::vector<actor<logic>> m_actors;
   std::vector<object> m_objects;
   std::vector<double> m_produce_consume_rates;
   market m_exchange;
   transaction m_last_transaction;
+  unsigned m_time = 0;
 };
