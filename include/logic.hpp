@@ -35,14 +35,15 @@ public:
     for (const object& obj : m_world->get_objects())
     {
       object_id obj_id = obj.get_id();
-      unsigned own = m_actor->get_stock(obj_id);
-      double price = m_world->get_price(obj_id);
 
       bool is_in_need;
       if (m_is_consuming.find(obj_id) != m_is_consuming.end())
       {
         is_in_need = m_actor->destroy(obj_id, m_consumption_rate);
       }
+
+      unsigned own = m_actor->get_stock(obj_id);
+      double price = m_world->get_price(obj_id);
       if (is_in_need)
       {
         price = price * (1.0 + m_need_price_increase_factor);

@@ -15,16 +15,36 @@ class actor {
 public:
   actor() = delete;
 
-  actor(actor_id id, double cash, world<logic>* w) : m_id(id), m_cash(cash), m_logic(this, w) { };
+  actor(actor_id id, double cash, world<logic>* w) : m_id(id), m_cash(cash), m_remaining_storage(500), m_logic(this, w) { };
 
   actor_id get_id() const
   {
     return m_id;
   }
 
+  double get_remaining_storage() const
+  {
+    return m_remaining_storage;
+  }
+
+  double get_cash() const
+  {
+    return m_cash;
+  }
+
+  double get_reserved_cash() const
+  {
+    return m_reserved_cash;
+  }
+
   unsigned get_stock(object_id oid)
   {
     return m_stock[oid];
+  }
+
+  unsigned get_reserve(object_id oid)
+  {
+    return m_reserve[oid];
   }
 
   void step(order_list& order_list)
@@ -34,15 +54,22 @@ public:
 
   void create(object_id obj, unsigned quantity)
   {
+    if (m_remaining_storage < quantity)
+    {
+      quantity = m_remaining_storage;
+    }
     m_stock[obj] += quantity;
+    m_remaining_storage -= quantity;
   }
 
   bool destroy(object_id obj, unsigned quantity)
   {
-    if (m_stock[obj] > quantity)
+    if (m_stock[obj] < quantity)
     {
-      m_stock[obj] -= quantity;
+      quantity = m_stock[obj];
     }
+    m_stock[obj] -= quantity;
+    m_remaining_storage += quantity;
     return m_stock[obj] == 0;
   }
 
@@ -117,6 +144,7 @@ private:
   actor_id m_id;
   double m_cash;
   double m_reserved_cash;
+  size_t m_remaining_storage;
   std::map<object_id, unsigned> m_stock;
   std::map<object_id, unsigned> m_reserve;
   logic m_logic;

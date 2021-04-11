@@ -7,6 +7,7 @@
 #include <vector>
 #include <random>
 #include <limits>
+#include <mutex>
 
 
 void setup_rng(long seed = time(nullptr))
@@ -24,6 +25,12 @@ T generate_random_number(T min, T max)
 template<class logic>
 class world {
 public:
+  world()
+  {
+    m_stepping = true;
+    m_block_mtx.lock();
+  }
+
   void init()
   {
     generate_random_world();
@@ -47,7 +54,7 @@ public:
     for (int i = 0 ; i < 4 ; ++ i)
     {
       double x = rand();
-      double cash = generate_random_number<double>(0, 1000);
+      double cash = 1000.0;
       m_actors.emplace_back(i, cash, this);
       for (object obj : m_objects)
       {
@@ -59,6 +66,11 @@ public:
 
   void step()
   {
+    if (!m_stepping)
+    {
+      m_block_mtx.lock();
+    }
+
     order_list order_list;
 
     for (actor<logic> act : m_actors)
@@ -109,6 +121,8 @@ public:
     m_last_transaction.render();
   }
 
+  const std::vector<actor<logic>>& get_actors() const { return m_actors; }
+
   const std::vector<object>& get_objects() const { return m_objects; }
 
   double get_price(object_id oid) const { return m_objects[oid].get_price(); }
@@ -117,11 +131,32 @@ public:
 
   unsigned get_time() const { return m_time; }
 
+  bool is_running() const { return m_stepping; }
+
+  void stop()
+  {
+    m_stepping_mtx.lock();
+    m_stepping = false;
+    m_stepping_mtx.unlock();
+  }
+
+  void start()
+  {
+    m_stepping_mtx.lock();
+    m_stepping = true;
+    m_stepping_mtx.unlock();
+    m_block_mtx.unlock();
+  }
+
 private:
   std::vector<actor<logic>> m_actors;
   std::vector<object> m_objects;
   std::vector<double> m_produce_consume_rates;
   market m_exchange;
   transaction m_last_transaction;
+
+  bool m_stepping = true;
   unsigned m_time = 0;
+  std::mutex m_stepping_mtx;
+  std::mutex m_block_mtx;
 };
