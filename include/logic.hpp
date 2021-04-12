@@ -31,16 +31,29 @@ public:
       }
 
       unsigned own = m_actor->get_stock(obj_id);
-      double price = m_world->get_price(obj_id);
-      if (is_in_need)
+      double price = m_world->get_mkt_buy_price(obj_id);
+      if (price == INFINITY)
       {
-        price = price * (1.0 + m_need_price_increase_factor);
+        price = m_world->get_price(obj_id);
+        if (is_in_need)
+        {
+          price = price * (1.0 + m_need_price_increase_factor);
+        }
       }
 
       if (own < m_need_threshold)
       {
         if (m_is_producing != obj_id)
         {
+          double price = m_world->get_mkt_buy_price(obj_id);
+          if (price == INFINITY)
+          {
+            price = m_world->get_price(obj_id);
+            if (is_in_need)
+            {
+              price = price * (1.0 + m_need_price_increase_factor);
+            }
+          }
           double target_price = price * (1.0 + m_buy_margin_factor);
           order o = m_actor->make_order(order_type::BUY, 1, target_price, obj_id);
           if (o.is_valid())
@@ -62,6 +75,11 @@ public:
       }
       else if (own < m_liquidate_threshold)
       {
+        double price = m_world->get_mkt_sell_price(obj_id);
+        if (price == 0.f)
+        {
+          price = m_world->get_price(obj_id);
+        }
         double target_price = price * (1.0 - m_sell_margin_factor);
         order o = m_actor->make_order(order_type::SELL, 1, target_price, obj_id);
         if (o.is_valid())

@@ -45,7 +45,7 @@ private:
     for (auto obj : m_world.get_objects())
     {
       object_id oid = obj.get_id();
-      ss << oid << " : " << m_actor.get_stock(oid) << " units and " << m_actor.get_reserve(oid) << " in reserve\n";
+      //ss << oid << " : " << m_actor.get_stock(oid) << " units and " << m_actor.get_reserve(oid) << " in reserve\n";
     }
     sf::Text actor_text;
     actor_text.setFont(m_font);
@@ -147,20 +147,20 @@ public:
 
     render_information(sf::FloatRect(600, 500, 200, 100));
 
-    render_object_prices(sf::Vector2f(600, 20));
+    render_object_prices(sf::FloatRect(600, 0, 200, 200));
 
-    render_transactions(sf::Vector2f(20, 500));
+    render_transactions(sf::FloatRect(0, 500, 600, 100));
 
     render_actors(sf::FloatRect(0, 0, 600, 200));
 
-    render_orders(sf::Vector2f(20, 200));
+    render_orders(sf::FloatRect(0, 200, 800, 300));
   }
 
   grid split_area(const sf::FloatRect& total_area, int rows, int cols)
   {
     grid g;
-    float unit_height = total_area.height / (rows * cols);
-    float unit_width = total_area.width / (rows * cols);
+    float unit_height = total_area.height / rows;
+    float unit_width = total_area.width / cols;
     int r = 0, c = 0;
     g.resize(rows);
     for (auto& row : g)
@@ -180,6 +180,16 @@ public:
     return g;
   }
 
+  void draw_background(sf::FloatRect area, sf::Color outline, sf::Color fill = sf::Color::Transparent)
+  {
+    sf::RectangleShape background(sf::Vector2f(area.width, area.height));
+    background.setPosition(area.left, area.top);
+    background.setOutlineThickness(2);
+    background.setOutlineColor(outline);
+    background.setFillColor(fill);
+    m_window.draw(background);
+  }
+
   sf::Text prepare_text(const std::string& str, sf::Vector2f position, unsigned int size = 10)
   {
     sf::Text text;
@@ -193,6 +203,8 @@ public:
 
   void render_information(sf::FloatRect area)
   {
+    draw_background(area, sf::Color::Black, sf::Color::Yellow);
+
     std::stringstream ss;
     ss << std::setw(30) << std::right << "p ==> step. mode" << "\n"
        << std::setw(30) << std::right << "s ==> start/stop" << "\n"
@@ -210,8 +222,11 @@ public:
     m_window.draw(info_text);
   }
 
-  void render_object_prices(sf::Vector2f position)
+  void render_object_prices(sf::FloatRect area)
   {
+    draw_background(area, sf::Color::Black, sf::Color::Green);
+
+    sf::Vector2f position(area.left, area.top);
     for (auto obj : m_world.get_objects())
     {
       std::stringstream ss;
@@ -223,7 +238,9 @@ public:
 
   void render_actors(sf::FloatRect area)
   {
-    int rows = 2, cols = 2;
+    draw_background(area, sf::Color::Black, sf::Color::Yellow);
+
+    int rows = 4, cols = 4;
     grid area_grid = split_area(area, rows, cols);
     int row = 0, col = 0;
     double total_money = 0.f;
@@ -245,13 +262,16 @@ public:
     }
     std::stringstream ss;
     ss << "total money is: " << total_money << "\n";
-    sf::Vector2f draw_position(area.left, area.top);
+    sf::Vector2f draw_position(area.left + (area.width / 2), area.top + area.height - 10);
     sf::Text total_money_text = prepare_text(ss.str(), draw_position);
     m_window.draw(total_money_text);
   }
 
-  void render_orders(sf::Vector2f position)
+  void render_orders(sf::FloatRect area)
   {
+    draw_background(area, sf::Color::Black, sf::Color::White);
+
+    sf::Vector2f position(area.left, area.top);
     std::stringstream ss;
     float initial_y = position.y;
     for (auto o : m_world.get_objects())
@@ -301,8 +321,11 @@ public:
     }
   }
 
-  void render_transactions(sf::Vector2f position)
+  void render_transactions(sf::FloatRect area)
   {
+    draw_background(area, sf::Color::Black, sf::Color::Blue);
+
+    sf::Vector2f position(area.left, area.top);
     std::stringstream ss;
     std::list<transaction> tr_list = m_world.get_last_transactions();
     if (tr_list.empty())

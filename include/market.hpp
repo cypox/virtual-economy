@@ -3,6 +3,7 @@
 #include "order.hpp"
 #include "transaction.hpp"
 
+#include <cmath>
 #include <queue>
 #include <map>
 #include <list>
@@ -142,6 +143,38 @@ public:
       m_sell_orders[to_satisfy.get_object_id()].insert(to_satisfy);
     }
     return transaction();
+  }
+
+  double get_lowest_offer(object_id oid) const
+  {
+    double lowest_offer = INFINITY;
+    if (m_sell_orders.count(oid))
+    {
+      for(const order& o : m_sell_orders.at(oid))
+      {
+        if (o.get_strike() < lowest_offer)
+        {
+          lowest_offer = o.get_strike();
+        }
+      }
+    }
+    return lowest_offer;
+  }
+
+  double get_highest_bid(object_id oid) const
+  {
+    double highest_bid = 0.f;
+    if (m_buy_orders.count(oid))
+    {
+      for(const order& o : m_buy_orders.at(oid))
+      {
+        if (o.get_strike() > highest_bid)
+        {
+          highest_bid = o.get_strike();
+        }
+      }
+    }
+    return highest_bid;
   }
 
   void render()

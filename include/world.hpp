@@ -48,7 +48,7 @@ public:
   void generate_random_world()
   {
     unsigned n_objects = 10;
-    unsigned n_actors = 1200;
+    unsigned n_actors = 100;
 
     m_objects.reserve(n_objects);
     m_produce_consume_rates.reserve(n_objects);
@@ -68,7 +68,7 @@ public:
       m_actors.emplace_back(i, cash, this);
       for (object obj : m_objects)
       {
-        unsigned quantity = generate_random_number<unsigned>(50, 100);
+        unsigned quantity = generate_random_number<unsigned>(0, 0);
         m_actors[i].create(obj.get_id(), quantity);
       }
     }
@@ -163,6 +163,10 @@ public:
     printf("Exchange:\n");
     m_exchange.render();
   }
+
+  double get_mkt_buy_price(object_id oid) const { return m_exchange.get_lowest_offer(oid); }
+
+  double get_mkt_sell_price(object_id oid) const { return m_exchange.get_highest_bid(oid); }
 
   const std::vector<actor<logic>>& get_actors() const { return m_actors; }
 
