@@ -18,7 +18,7 @@ public:
   {
     if (end_trading_day)
     {
-      cancel_all_orders(orders, tr_list);
+      cancel_all_orders();
       return;
     }
 
@@ -38,37 +38,13 @@ public:
     }
   }
 
-  void cancel_all_orders(const order_list& orders, std::queue<transaction>& tr_list)
+  void cancel_all_orders()
   {
-    throw std::runtime_error("function is bugged");
-    for (order ord : orders)
-    {
-      tr_list.push(self_settle(ord));
-    }
-
     while(!m_order_queue.empty())
     {
-      order top_order = m_order_queue.front();
       m_order_queue.pop();
-      tr_list.push(self_settle(top_order));
-    }
-
-    for(auto s : m_buy_orders)
-    {
-      for (auto o : s.second)
-      {
-        tr_list.push(self_settle(o));
-      }
     }
     m_buy_orders.clear();
-
-    for(auto s : m_sell_orders)
-    {
-      for (auto o : s.second)
-      {
-        tr_list.push(self_settle(o));
-      }
-    }
     m_sell_orders.clear();
   }
 
