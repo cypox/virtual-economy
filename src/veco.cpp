@@ -23,6 +23,7 @@ int main(int argc, char** argv)
 
   while (window.isOpen())
   {
+    window.setActive(false);
     simulation_world.step();
   }
   return 0;
