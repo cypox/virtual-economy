@@ -85,7 +85,7 @@ public:
     }
   }
 
-  render(sf::RenderWindow& window, world& w) : m_window(window), m_world(w)
+  render(sf::RenderWindow& window, const world& w) : m_window(window), m_world(w)
   {
     if (!m_font.loadFromFile("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"))
     {
@@ -184,19 +184,65 @@ public:
   void render_market(sf::Vector2f position)
   {
     std::stringstream ss;
+    float initial_y = position.y;
     for (auto o : m_world.get_objects())
     {
       object_id oid = o.get_id();
       auto order_map = m_world.get_market().get_buy_order_list();
       int buy_size = 0;
       if (order_map.count(oid) > 0)
-        buy_size = m_world.get_market().get_buy_order_list().at(oid).size();
+      {
+        buy_size = order_map.at(oid).size();
+        ss.str("");
+        ss << "#BUY" << oid << " has " << buy_size;
+        m_window.draw(prepare_text(ss.str(), position));
+        position.y += 16;
+        for (auto o : order_map.at(oid))
+        {
+          ss.str("");
+          ss << o.get_actor_id() << "@" << o.get_strike();
+          m_window.draw(prepare_text(ss.str(), position));
+          position.y += 16;
+        }
+      }
+
+      position.y += 16;
+
       order_map = m_world.get_market().get_sell_order_list();
       int sell_size = 0;
       if (order_map.count(oid) > 0)
-        sell_size = m_world.get_market().get_sell_order_list().at(oid).size();
+      {
+        sell_size = order_map.at(oid).size();
+        ss.str("");
+        ss << "#SELL" << oid << " has " << sell_size;
+        m_window.draw(prepare_text(ss.str(), position));
+        position.y += 16;
+        for (auto o : order_map.at(oid))
+        {
+          ss.str("");
+          ss << o.get_actor_id() << "@" << o.get_strike();
+          m_window.draw(prepare_text(ss.str(), position));
+          position.y += 16;
+        }
+      }
+
+      position.x += 128;
+      position.y = initial_y;
+    }
+  }
+
+  void render_transactions(sf::Vector2f position)
+  {
+    std::stringstream ss;
+    std::list<transaction> tr_list = m_world.get_last_transactions();
+    if (tr_list.empty())
+    {
+      return;
+    }
+    for (transaction tr : tr_list)
+    {
       ss.str("");
-      ss << "object " << oid << " has " << buy_size << " buyers and " << sell_size << " sellers";
+      ss << tr.get_buyer() << " BOUGHT " << tr.get_object() << " FROM " << tr.get_seller() << " @ " << tr.get_price();
       m_window.draw(prepare_text(ss.str(), position));
       position.y += 16;
     }
@@ -204,25 +250,31 @@ public:
 
   void render_world()
   {
-    sf::RectangleShape shape(sf::Vector2f(800.f, 600.f));
+    sf::RectangleShape shape(sf::Vector2f(800, 600));
     shape.setFillColor(sf::Color::White);
     m_window.draw(shape);
 
-    render_information(sf::Vector2f(20.f, 510.f));
+    sf::RectangleShape background(sf::Vector2f(400, 90));
+    background.setFillColor(sf::Color::Black);
+    background.setPosition(sf::Vector2f(10, 510));
+    m_window.draw(background);
+    render_information(sf::Vector2f(20, 510));
 
-    render_world_time(sf::Vector2f(20.f, 20.f));
+    render_world_time(sf::Vector2f(20, 20));
 
-    render_object_prices(sf::Vector2f(20.f, 60.f));
+    render_object_prices(sf::Vector2f(20, 60));
 
-    render_actors(sf::Vector2f(400.f, 20.f));
+    render_transactions(sf::Vector2f(20, 320));
 
-    render_market(sf::Vector2f(20.f, 160.f));
+    render_actors(sf::Vector2f(400, 20));
 
-    render_time(sf::Vector2f(690.f, 580.f));
+    render_market(sf::Vector2f(20, 160));
+
+    render_time(sf::Vector2f(690, 580));
   }
 
 private:
   sf::RenderWindow& m_window;
-  world& m_world;
+  const world& m_world;
   sf::Font m_font;
 };

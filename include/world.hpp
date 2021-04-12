@@ -6,6 +6,7 @@
 
 #include <vector>
 #include <queue>
+#include <list>
 #include <random>
 #include <limits>
 #include <mutex>
@@ -88,6 +89,7 @@ public:
 
     m_exchange.step(order_list, m_last_transactions);
 
+    m_last_settled_transactions.clear();
     while(!m_last_transactions.empty())
     {
       settle(m_last_transactions.front());
@@ -118,6 +120,7 @@ public:
     if (success)
     {
       m_objects[t.get_object()].set_price(t.get_price());
+      m_last_settled_transactions.push_back(m_last_transactions.front());
     }
     else
     {
@@ -157,14 +160,14 @@ public:
 
   bool is_stepping() const { return m_stepping; }
 
-  void stop()
+  void stop() const
   {
     m_running_mtx.lock();
     m_running = false;
     m_running_mtx.unlock();
   }
 
-  void start()
+  void start() const
   {
     m_running_mtx.lock();
     m_running = true;
@@ -172,7 +175,7 @@ public:
     m_block_mtx.unlock();
   }
 
-  void next_step()
+  void next_step() const
   {
     if (m_running)
     {
@@ -184,13 +187,13 @@ public:
     }
   }
 
-  void disable_stepping()
+  void disable_stepping() const
   {
     m_stepping = false;
     m_stepping_mtx.unlock();
   }
 
-  void unlock_mtx()
+  void unlock_mtx() const
   {
     if (!m_running)
     {
@@ -200,6 +203,7 @@ public:
   }
 
   const market& get_market() const { return m_exchange; };
+  const std::list<transaction>& get_last_transactions() const { return m_last_settled_transactions; };
 
 private:
   std::vector<actor<logic>> m_actors;
@@ -207,11 +211,13 @@ private:
   std::vector<double> m_produce_consume_rates;
   market m_exchange;
   std::queue<transaction> m_last_transactions;
+  std::list<transaction> m_last_settled_transactions;
 
-  bool m_running;
-  bool m_stepping;
   unsigned m_time = 0;
-  std::mutex m_running_mtx;
-  std::mutex m_block_mtx;
-  std::mutex m_stepping_mtx;
+
+  mutable bool m_running;
+  mutable bool m_stepping;
+  mutable std::mutex m_running_mtx;
+  mutable std::mutex m_block_mtx;
+  mutable std::mutex m_stepping_mtx;
 };
