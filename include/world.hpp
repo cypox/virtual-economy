@@ -91,12 +91,20 @@ public:
 
     order_list order_list;
 
-    for (actor<logic> act : m_actors)
+    for (actor_t act : m_actors)
     {
       act.step(order_list);
     }
 
-    m_exchange.step(order_list, m_last_transactions);
+    bool end_day = (m_time % 100) == 0;
+    m_exchange.step(order_list, m_last_transactions, end_day);
+    if (end_day)
+    {
+      for (actor_t& act : m_actors)
+      {
+        act.cancel_all_orders();
+      }
+    }
 
     m_trsc_mtx.lock();
     m_last_settled_transactions.clear();
@@ -151,7 +159,7 @@ public:
   void render()
   {
     printf("Population:\n");
-    for (const actor<logic>& act : m_actors)
+    for (const actor_t& act : m_actors)
     {
       act.render();
     }
@@ -168,7 +176,7 @@ public:
 
   double get_mkt_sell_price(object_id oid) const { return m_exchange.get_highest_bid(oid); }
 
-  const std::vector<actor<logic>>& get_actors() const { return m_actors; }
+  const std::vector<actor_t>& get_actors() const { return m_actors; }
 
   const std::vector<object>& get_objects() const { return m_objects; }
 
@@ -243,7 +251,7 @@ public:
   }
 
 private:
-  std::vector<actor<logic>> m_actors;
+  std::vector<actor_t> m_actors;
   std::vector<object> m_objects;
   std::vector<double> m_produce_consume_rates;
   market m_exchange;

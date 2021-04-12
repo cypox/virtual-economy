@@ -4,6 +4,7 @@
 #include "object.hpp"
 
 #include <map>
+#include <list>
 
 
 typedef unsigned actor_id;
@@ -106,7 +107,38 @@ public:
         return order();
       }
     }
-    return order(type, quantity, price, obj, m_id);
+    order ord(type, quantity, price, obj, m_id);
+    m_orders.push_back(ord);
+    return ord;
+  }
+
+  void cancel_all_orders()
+  {
+    while(!m_orders.empty())
+    {
+      order o = m_orders.front();
+      cancel_order(o);
+      m_orders.pop_front();
+    }
+  }
+
+  void cancel_order(order& o)
+  {
+    object_id obj = o.get_object_id();
+    order_type type = o.get_type();
+    double price = o.get_strike();
+    unsigned quantity = o.get_quantity();
+    if (type == order_type::SELL)
+    {
+      m_stock[obj] += quantity;
+      m_reserve[obj] -= quantity;
+    }
+    else if (type == order_type::BUY)
+    {
+      double total_price = price * quantity;
+      m_cash += total_price;
+      m_reserved_cash -= total_price;
+    }
   }
 
   bool execute_buy(object_id obj, unsigned quantity, double price)
@@ -151,5 +183,6 @@ private:
   size_t m_remaining_storage;
   std::map<object_id, int> m_stock;
   std::map<object_id, int> m_reserve;
+  std::list<order> m_orders;
   logic m_logic;
 };
