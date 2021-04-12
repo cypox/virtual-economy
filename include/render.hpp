@@ -193,13 +193,15 @@ public:
   void render_information(sf::FloatRect area)
   {
     std::stringstream ss;
-    ss << std::setw(64) << std::internal << "iteration: " << m_world.get_time() << "\n"
-       << std::setw(64) << std::right << "p ==> stepping mode" << "\n"
-       << std::setw(64) << std::right << "s ==> start/stop simulation" << "\n"
-       << std::setw(64) << std::right << "t ==> disable stepping" << "\n"
-       << std::setw(64) << std::right << "q ==> exit" << "\n"
-       << std::setw(64) << std::right << get_time();
-    sf::Text info_text = prepare_text(ss.str(), sf::Vector2f(area.left, area.top), 10);
+    ss << "iteration:"
+       << std::setw(20) << std::right << m_world.get_time() << "\n"
+       << "time:"
+       << std::setw(25) << std::right << get_time() << "\n"
+       << std::setw(30) << std::right << "p ==> stepping mode" << "\n"
+       << std::setw(30) << std::right << "s ==> start/stop simulation" << "\n"
+       << std::setw(30) << std::right << "t ==> disable stepping" << "\n"
+       << std::setw(30) << std::right << "q ==> exit" << "\n";
+    sf::Text info_text = prepare_text(ss.str(), sf::Vector2f(area.left, area.top), 8);
     sf::FloatRect bounds = info_text.getLocalBounds();
     info_text.setPosition(area.left + area.width - bounds.width - 10, area.top + area.height - bounds.height);
     m_window.draw(info_text);
