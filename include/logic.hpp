@@ -14,20 +14,8 @@ public:
   basic_logic() = delete;
   basic_logic(actor<basic_logic>* act, world<basic_logic>* w) : m_actor(act), m_world(w)
   {
-    for (const object& obj : m_world->get_objects())
-    {
-      object_id oid = obj.get_id();
-      double producers_rate = m_world->get_producers_consumers_rate(oid);
-      double chance = generate_random_number<double>(0, 1);
-      if (chance > producers_rate)
-      {
-        m_is_producing.insert(oid);
-      }
-      else
-      {
-        m_is_consuming.insert(oid);
-      }
-    }
+    m_is_consuming = generate_random_number<object_id>(0, m_world->get_objects().size());
+    m_is_producing = generate_random_number<object_id>(0, m_world->get_objects().size());
   };
 
   void take_decision(order_list& order_list)
@@ -37,7 +25,7 @@ public:
       object_id obj_id = obj.get_id();
 
       bool is_in_need;
-      if (m_is_consuming.find(obj_id) != m_is_consuming.end())
+      if (m_is_consuming = obj_id)
       {
         is_in_need = m_actor->destroy(obj_id, m_consumption_rate);
       }
@@ -51,7 +39,7 @@ public:
 
       if (own < m_need_threshold)
       {
-        if (m_is_producing.find(obj_id) == m_is_producing.end())
+        if (m_is_producing != obj_id)
         {
           double target_price = price * (1.0 + m_buy_margin_factor);
           order o = m_actor->make_order(order_type::BUY, 1, target_price, obj_id);
@@ -65,14 +53,14 @@ public:
           m_actor->create(obj_id, m_production_rate);
         }
       }
-      else if (own >= m_produce_threshold && own < m_liquidate_threshold)
+      else if (own < m_produce_threshold)
       {
-        if (m_is_producing.find(obj_id) != m_is_producing.end())
+        if (m_is_producing == obj_id)
         {
           m_actor->create(obj_id, m_production_rate);
         }
       }
-      else if (own >= m_liquidate_threshold && own < m_waste_threshold)
+      else if (own < m_liquidate_threshold)
       {
         double target_price = price * (1.0 - m_sell_margin_factor);
         order o = m_actor->make_order(order_type::SELL, 1, target_price, obj_id);
@@ -81,7 +69,7 @@ public:
           order_list.emplace(o);
         }
       }
-      else if (own >= m_waste_threshold)
+      else
       {
         m_actor->destroy(obj_id, m_waste_rate);
       }
@@ -101,6 +89,6 @@ private:
   unsigned m_consumption_rate = 2;
   unsigned m_production_rate = 5;
   unsigned m_waste_rate = 3;
-  std::unordered_set<object_id> m_is_producing;
-  std::unordered_set<object_id> m_is_consuming;
+  object_id m_is_producing;
+  object_id m_is_consuming;
 };

@@ -68,7 +68,7 @@ public:
               case sf::Keyboard::P:
                 m_world.next_step();
                 break;
-              case sf::Keyboard::R:
+              case sf::Keyboard::T:
                 m_world.disable_stepping();
                 break;
             }
@@ -115,7 +115,7 @@ public:
     ss.str("s ==> start/stop simulation");
     m_window.draw(prepare_text(ss.str(), position));
     position.y += 16;
-    ss.str("r ==> resume simulation after stepping mode");
+    ss.str("t ==> resume simulation after stepping mode");
     m_window.draw(prepare_text(ss.str(), position));
     position.y += 16;
     ss.str("q ==> exit");
