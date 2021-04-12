@@ -50,7 +50,7 @@ private:
     sf::Text actor_text;
     actor_text.setFont(m_font);
     actor_text.setString(ss.str());
-    actor_text.setCharacterSize(16); // in pixels, not points!
+    actor_text.setCharacterSize(10); // in pixels, not points!
     actor_text.setFillColor(sf::Color::Red);
     actor_text.setPosition(get_position());
     target.draw(actor_text);
@@ -175,11 +175,12 @@ public:
         c ++;
       }
       r ++;
+      c = 0;
     }
     return g;
   }
 
-  sf::Text prepare_text(const std::string& str, sf::Vector2f position, unsigned int size = 16)
+  sf::Text prepare_text(const std::string& str, sf::Vector2f position, unsigned int size = 10)
   {
     sf::Text text;
     text.setFont(m_font);
