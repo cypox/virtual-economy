@@ -112,9 +112,13 @@ public:
   bool execute_buy(object_id obj, unsigned quantity, double price)
   {
     double total_price = price * quantity;
+    if (m_remaining_storage <= quantity)
+    {
+      quantity = m_remaining_storage;
+    }
+    m_remaining_storage -= quantity;
     m_reserved_cash -= total_price;
     m_stock[obj] += quantity;
-    m_remaining_storage -= quantity;
     return m_reserved_cash >= 0;
   }
 
