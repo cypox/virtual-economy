@@ -141,7 +141,7 @@ public:
 
   void render_world()
   {
-    sf::RectangleShape shape(sf::Vector2f(800, 600));
+    sf::RectangleShape shape(sf::Vector2f(m_window.getSize().x, m_window.getSize().y));
     shape.setFillColor(sf::Color::White);
     m_window.draw(shape);
 
@@ -194,14 +194,16 @@ public:
   void render_information(sf::FloatRect area)
   {
     std::stringstream ss;
-    ss << "iteration:"
+    ss << std::setw(30) << std::right << "p ==> step. mode" << "\n"
+       << std::setw(30) << std::right << "s ==> start/stop" << "\n"
+       << std::setw(30) << std::right << "t ==> nostepping" << "\n"
+       << std::setw(30) << std::right << "q ==> exit prog." << "\n"
+       << "iteration:"
        << std::setw(20) << std::right << m_world.get_time() << "\n"
+       << "last iteration time:"
+       << std::setw(10) << std::right << m_world.get_iteration_time() / 1000 << "\n"
        << "time:"
-       << std::setw(25) << std::right << get_time() << "\n"
-       << std::setw(30) << std::right << "p ==> stepping mode" << "\n"
-       << std::setw(30) << std::right << "s ==> start/stop simulation" << "\n"
-       << std::setw(30) << std::right << "t ==> disable stepping" << "\n"
-       << std::setw(30) << std::right << "q ==> exit" << "\n";
+       << std::setw(25) << std::right << get_time() << "\n";
     sf::Text info_text = prepare_text(ss.str(), sf::Vector2f(area.left, area.top), 8);
     sf::FloatRect bounds = info_text.getLocalBounds();
     info_text.setPosition(area.left + area.width - bounds.width - 10, area.top + area.height - bounds.height);

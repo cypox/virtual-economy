@@ -10,6 +10,7 @@
 #include <random>
 #include <limits>
 #include <mutex>
+#include <sys/time.h>
 
 
 void setup_rng(long seed = time(nullptr))
@@ -46,25 +47,28 @@ public:
 
   void generate_random_world()
   {
-    m_objects.reserve(3);
-    m_produce_consume_rates.reserve(3);
-    for (int i = 0 ; i < 3 ; ++ i)
+    unsigned n_objects = 10;
+    unsigned n_actors = 1200;
+
+    m_objects.reserve(n_objects);
+    m_produce_consume_rates.reserve(n_objects);
+    for (int i = 0 ; i < n_objects ; ++ i)
     {
-      double price = generate_random_number<double>(0, 10);
+      double price = generate_random_number<double>(10, 40);
       m_objects.emplace_back(i, price);
       double prducers_consumers_rate = generate_random_number<double>(0, 1);
       m_produce_consume_rates.emplace_back(prducers_consumers_rate);
     }
 
-    m_actors.reserve(4);
-    for (int i = 0 ; i < 4 ; ++ i)
+    m_actors.reserve(n_actors);
+    for (int i = 0 ; i < n_actors ; ++ i)
     {
       double x = rand();
       double cash = 1000.0;
       m_actors.emplace_back(i, cash, this);
       for (object obj : m_objects)
       {
-        unsigned quantity = generate_random_number<unsigned>(0, 50);
+        unsigned quantity = generate_random_number<unsigned>(50, 100);
         m_actors[i].create(obj.get_id(), quantity);
       }
     }
@@ -81,6 +85,9 @@ public:
     {
       m_stepping_mtx.lock();
     }
+
+    struct timeval start, end;
+    gettimeofday(&start, nullptr);
 
     order_list order_list;
 
@@ -101,6 +108,11 @@ public:
     }
 
     m_time++;
+
+    gettimeofday(&end, nullptr);
+    m_iter_us_mtx.lock();
+    m_iter_microsecs = (end.tv_sec * 1000000 + end.tv_usec) - (start.tv_sec * 1000000 + start.tv_usec);
+    m_iter_us_mtx.unlock();
   }
 
   bool settle(const transaction& t)
@@ -217,6 +229,15 @@ public:
     return copy;
   }
 
+  long get_iteration_time() const
+  {
+    long time;
+    m_iter_us_mtx.lock();
+    time = m_iter_microsecs;
+    m_iter_us_mtx.unlock();
+    return time;
+  }
+
 private:
   std::vector<actor<logic>> m_actors;
   std::vector<object> m_objects;
@@ -226,6 +247,8 @@ private:
   std::list<transaction> m_last_settled_transactions;
 
   unsigned m_time = 0;
+  long m_iter_microsecs;
+  mutable std::mutex m_iter_us_mtx;
 
   mutable bool m_running;
   mutable bool m_stepping;
