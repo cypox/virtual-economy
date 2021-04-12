@@ -27,6 +27,8 @@ T generate_random_number(T min, T max)
 template<class logic>
 class world {
 public:
+  typedef actor<logic> actor_t;
+
   world(long seed, bool running = false, bool stepping = true) : m_running(running), m_stepping(stepping)
   {
     setup_rng(seed);

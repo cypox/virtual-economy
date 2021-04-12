@@ -37,14 +37,20 @@ public:
     return m_reserved_cash;
   }
 
-  unsigned get_stock(object_id oid)
+  unsigned get_stock(object_id oid) const
   {
-    return m_stock[oid];
+    if (m_stock.count(oid))
+      return m_stock.at(oid);
+    else
+      return 0;
   }
 
-  unsigned get_reserve(object_id oid)
+  unsigned get_reserve(object_id oid) const
   {
-    return m_reserve[oid];
+    if (m_reserve.count(oid))
+      return m_reserve.at(oid);
+    else
+      return 0;
   }
 
   void step(order_list& order_list)

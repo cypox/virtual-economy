@@ -27,6 +27,47 @@ char* get_time()
 }
 
 template<class world>
+class actor_panel : public sf::Drawable {
+  using actor = world::actor_t;
+
+public:
+  actor_panel(const actor& act, const world& w, const sf::FloatRect& area, const sf::Font& font) : m_actor(act), m_world(w), m_area(area), m_font(font) {};
+
+private:
+  virtual void draw(sf::RenderTarget& target,sf::RenderStates states) const
+  {
+    std::stringstream ss;
+    ss << m_actor.get_id() << " : " << std::setprecision(8)
+        << (unsigned)(m_actor.get_cash() + m_actor.get_reserved_cash()) << "$"
+        << " (" << std::setprecision(8) << (unsigned)m_actor.get_cash() << "$ liquid)\n";
+
+    ss << "has: " << m_actor.get_remaining_storage() << "\n";
+    for (auto obj : m_world.get_objects())
+    {
+      object_id oid = obj.get_id();
+      ss << oid << " : " << m_actor.get_stock(oid) << " units and " << m_actor.get_reserve(oid) << " in reserve\n";
+    }
+    sf::Text actor_text;
+    actor_text.setFont(m_font);
+    actor_text.setString(ss.str());
+    actor_text.setCharacterSize(16); // in pixels, not points!
+    actor_text.setFillColor(sf::Color::Red);
+    actor_text.setPosition(get_position());
+    target.draw(actor_text);
+  }
+
+  inline sf::Vector2f get_position() const
+  {
+    return sf::Vector2f(m_area.left, m_area.top);
+  }
+
+  const actor& m_actor;
+  const world& m_world;
+  const sf::FloatRect& m_area;
+  const sf::Font& m_font;
+};
+
+template<class world>
 class render {
 public:
   render() = delete;
@@ -92,7 +133,7 @@ public:
     }
   }
 
-  sf::Text prepare_text(const std::string& str, sf::Vector2f& position)
+  sf::Text prepare_text(const std::string& str, sf::Vector2f &position)
   {
     sf::Text text;
     text.setFont(m_font);
@@ -110,16 +151,10 @@ public:
        << "p ==> stepping mode\n"
        << "s ==> start/stop simulation\n"
        << "t ==> resume simulation after stepping mode\n"
-       << "q ==> exit";
+       << "q ==> exit\n"
+       << get_time();
     sf::Text info_text = prepare_text(ss.str(), position);
     m_window.draw(info_text);
-  }
-
-  void render_time(sf::Vector2f position)
-  {
-    std::stringstream ss;
-    ss << get_time();
-    m_window.draw(prepare_text(ss.str(), position));
   }
 
   void render_world_time(sf::Vector2f position)
@@ -140,41 +175,23 @@ public:
     }
   }
 
-  void render_actors(sf::Vector2f position)
+  void render_actors(sf::FloatRect area)
   {
     double total_money = 0.f;
     for (auto actor : m_world.get_actors())
     {
       total_money += actor.get_cash() + actor.get_reserved_cash();
-      std::stringstream ss;
-      ss << actor.get_id() << " : " << std::setprecision(8)
-         << (unsigned)(actor.get_cash() + actor.get_reserved_cash()) << "$"
-         << " (" << std::setprecision(8) << (unsigned)actor.get_cash() << "$ liquid)";
-      m_window.draw(prepare_text(ss.str(), position));
-      position.y += 16;
-
-      ss.str("");
-      ss << " has: " << actor.get_remaining_storage();
-      m_window.draw(prepare_text(ss.str(), position));
-      position.y += 16;
-      position.x += 16;
-      for (auto obj : m_world.get_objects())
-      {
-        object_id oid = obj.get_id();
-        std::stringstream ss;
-        ss << oid << " : " << actor.get_stock(oid) << " units and " << actor.get_reserve(oid) << " in reserve";
-        m_window.draw(prepare_text(ss.str(), position));
-        position.y += 16;
-      }
-      position.x -= 16;
+      actor_panel actors_drawing(actor, m_world, area, m_font);
+      m_window.draw(actors_drawing);
     }
-    position.y += 16;
     std::stringstream ss;
-    ss << "total money is: " << total_money;
-    m_window.draw(prepare_text(ss.str(), position));
+    ss << "total money is: " << total_money << "\n";
+    sf::Vector2f draw_position(area.left, area.top);
+    sf::Text total_money_text = prepare_text(ss.str(), draw_position);
+    m_window.draw(total_money_text);
   }
 
-  void render_market(sf::Vector2f position)
+  void render_orders(sf::Vector2f position)
   {
     std::stringstream ss;
     float initial_y = position.y;
@@ -199,7 +216,8 @@ public:
         }
       }
 
-      position.y += 16;
+      position.y = initial_y;
+      position.x += 128;
 
       order_map = m_world.get_market().get_sell_order_list();
       int sell_size = 0;
@@ -247,23 +265,17 @@ public:
     shape.setFillColor(sf::Color::White);
     m_window.draw(shape);
 
-    sf::RectangleShape background(sf::Vector2f(400, 100));
-    background.setFillColor(sf::Color::Black);
-    background.setPosition(sf::Vector2f(10, 500));
-    m_window.draw(background);
-    render_information(sf::Vector2f(20, 500));
+    render_information(sf::Vector2f(600, 500));
 
-    render_world_time(sf::Vector2f(20, 20));
+    render_world_time(sf::Vector2f(400, 20));
 
-    render_object_prices(sf::Vector2f(20, 60));
+    render_object_prices(sf::Vector2f(600, 20));
 
-    render_transactions(sf::Vector2f(20, 320));
+    render_transactions(sf::Vector2f(20, 500));
 
-    render_actors(sf::Vector2f(400, 20));
+    render_actors(sf::FloatRect(0, 0, 600, 200));
 
-    render_market(sf::Vector2f(20, 160));
-
-    render_time(sf::Vector2f(690, 580));
+    render_orders(sf::Vector2f(20, 200));
   }
 
 private:
