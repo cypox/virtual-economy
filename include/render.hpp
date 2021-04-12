@@ -44,8 +44,7 @@ public:
         {
           case sf::Event::Closed:
             m_window.close();
-            if (!m_world.is_running())
-                m_world.start();
+            m_world.unlock_mtx();
             break;
           
           case sf::Event::Resized:
@@ -106,20 +105,14 @@ public:
 
   void render_information(sf::Vector2f position)
   {
-    std::stringstream ss("press:");
-    m_window.draw(prepare_text(ss.str(), position));
-    position.y += 16;
-    ss.str("p ==> stepping mode");
-    m_window.draw(prepare_text(ss.str(), position));
-    position.y += 16;
-    ss.str("s ==> start/stop simulation");
-    m_window.draw(prepare_text(ss.str(), position));
-    position.y += 16;
-    ss.str("t ==> resume simulation after stepping mode");
-    m_window.draw(prepare_text(ss.str(), position));
-    position.y += 16;
-    ss.str("q ==> exit");
-    m_window.draw(prepare_text(ss.str(), position));
+    std::stringstream ss;
+    ss << "press:\n"
+       << "p ==> stepping mode\n"
+       << "s ==> start/stop simulation\n"
+       << "t ==> resume simulation after stepping mode\n"
+       << "q ==> exit";
+    sf::Text info_text = prepare_text(ss.str(), position);
+    m_window.draw(info_text);
   }
 
   void render_time(sf::Vector2f position)
@@ -254,11 +247,11 @@ public:
     shape.setFillColor(sf::Color::White);
     m_window.draw(shape);
 
-    sf::RectangleShape background(sf::Vector2f(400, 90));
+    sf::RectangleShape background(sf::Vector2f(400, 100));
     background.setFillColor(sf::Color::Black);
-    background.setPosition(sf::Vector2f(10, 510));
+    background.setPosition(sf::Vector2f(10, 500));
     m_window.draw(background);
-    render_information(sf::Vector2f(20, 510));
+    render_information(sf::Vector2f(20, 500));
 
     render_world_time(sf::Vector2f(20, 20));
 
