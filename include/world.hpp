@@ -91,7 +91,9 @@ public:
 
     m_exchange.step(order_list, m_last_transactions);
 
+    m_trsc_mtx.lock();
     m_last_settled_transactions.clear();
+    m_trsc_mtx.unlock();
     while(!m_last_transactions.empty())
     {
       settle(m_last_transactions.front());
@@ -122,7 +124,9 @@ public:
     if (success)
     {
       m_objects[t.get_object()].set_price(t.get_price());
+      m_trsc_mtx.lock();
       m_last_settled_transactions.push_back(m_last_transactions.front());
+      m_trsc_mtx.unlock();
     }
     else
     {
@@ -205,7 +209,13 @@ public:
   }
 
   const market& get_market() const { return m_exchange; };
-  const std::list<transaction>& get_last_transactions() const { return m_last_settled_transactions; };
+  std::list<transaction> get_last_transactions() const
+  {
+    m_trsc_mtx.lock();
+    std::list<transaction> copy = m_last_settled_transactions;
+    m_trsc_mtx.unlock();
+    return copy;
+  }
 
 private:
   std::vector<actor<logic>> m_actors;
@@ -222,4 +232,5 @@ private:
   mutable std::mutex m_running_mtx;
   mutable std::mutex m_block_mtx;
   mutable std::mutex m_stepping_mtx;
+  mutable std::mutex m_trsc_mtx;
 };

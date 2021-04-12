@@ -9,7 +9,7 @@ int main(int argc, char** argv)
   bool starts_running = parser.exists("--start-running");
   bool no_stepping = parser.exists("--no-stepping");
   int framerate = parser.get_int("--frame-rate", 60);
-  int rng_seed = parser.get_int("--seed", time(nullptr));
+  int rng_seed = parser.get_long("--seed", time(nullptr));
 
   world_t simulation_world(rng_seed, starts_running || !no_stepping, !no_stepping);
   simulation_world.init();

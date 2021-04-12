@@ -22,7 +22,7 @@ char* get_time()
   std::time_t t = std::time(nullptr);
   static char buffer[100];
   std::strftime(buffer, sizeof(buffer), "%H:%M:%S", std::localtime(&t));
-  sprintf(buffer+8, ".%03d\n", millisec);
+  sprintf(buffer+8, ".%03d", millisec);
   return buffer;
 }
 
@@ -38,8 +38,8 @@ private:
   {
     std::stringstream ss;
     ss << m_actor.get_id() << " : " << std::setprecision(8)
-        << (unsigned)(m_actor.get_cash() + m_actor.get_reserved_cash()) << "$"
-        << " (" << std::setprecision(8) << (unsigned)m_actor.get_cash() << "$ liquid)\n";
+        << std::put_money((m_actor.get_cash() + m_actor.get_reserved_cash()), true)
+        << " (" << std::setprecision(8) << std::put_money(m_actor.get_cash(), true) << " liquid)\n";
 
     ss << "has: " << m_actor.get_remaining_storage() << "\n";
     for (auto obj : m_world.get_objects())
@@ -70,7 +70,17 @@ private:
 template<class world>
 class render {
 public:
+  using grid = std::vector<std::vector<sf::FloatRect>>;
+
   render() = delete;
+
+  render(sf::RenderWindow& window, const world& w) : m_window(window), m_world(w)
+  {
+    if (!m_font.loadFromFile("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf"))
+    {
+      throw std::runtime_error("font not found!");
+    }
+  }
 
   void run()
   {
@@ -78,90 +88,121 @@ public:
 
     while (m_window.isOpen())
     {
-      sf::Event event;
-      while (m_window.pollEvent(event))
-      {
-        switch (event.type)
-        {
-          case sf::Event::Closed:
-            m_window.close();
-            m_world.unlock_mtx();
-            break;
-          
-          case sf::Event::Resized:
-            event.size.width;
-            event.size.height;
-            break;
-
-          case sf::Event::KeyPressed:
-            switch (event.key.code)
-            {
-              case sf::Keyboard::S:
-                if (m_world.is_running())
-                  m_world.stop();
-                else
-                  m_world.start();
-                break;
-              case sf::Keyboard::Q:
-                m_window.close();
-                m_world.unlock_mtx();
-              case sf::Keyboard::P:
-                m_world.next_step();
-                break;
-              case sf::Keyboard::T:
-                m_world.disable_stepping();
-                break;
-            }
-            break;
-
-          default:
-            break;
-        }
-      }
-
+      handle_events();
       m_window.clear();
       render_world();
       m_window.display();
     }
   }
 
-  render(sf::RenderWindow& window, const world& w) : m_window(window), m_world(w)
+  void handle_events()
   {
-    if (!m_font.loadFromFile("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"))
+    sf::Event event;
+    while (m_window.pollEvent(event))
     {
-      throw std::runtime_error("font not found!");
+      switch (event.type)
+      {
+        case sf::Event::Closed:
+          m_window.close();
+          m_world.unlock_mtx();
+          break;
+        
+        case sf::Event::Resized:
+          event.size.width;
+          event.size.height;
+          break;
+
+        case sf::Event::KeyPressed:
+          switch (event.key.code)
+          {
+            case sf::Keyboard::S:
+              if (m_world.is_running())
+                m_world.stop();
+              else
+                m_world.start();
+              break;
+            case sf::Keyboard::Q:
+              m_window.close();
+              m_world.unlock_mtx();
+            case sf::Keyboard::P:
+              m_world.next_step();
+              break;
+            case sf::Keyboard::T:
+              m_world.disable_stepping();
+              break;
+          }
+          break;
+
+        default:
+          break;
+      }
     }
   }
 
-  sf::Text prepare_text(const std::string& str, sf::Vector2f &position)
+  void render_world()
+  {
+    sf::RectangleShape shape(sf::Vector2f(800, 600));
+    shape.setFillColor(sf::Color::White);
+    m_window.draw(shape);
+
+    render_information(sf::FloatRect(600, 500, 200, 100));
+
+    render_object_prices(sf::Vector2f(600, 20));
+
+    render_transactions(sf::Vector2f(20, 500));
+
+    render_actors(sf::FloatRect(0, 0, 600, 200));
+
+    render_orders(sf::Vector2f(20, 200));
+  }
+
+  grid split_area(const sf::FloatRect& total_area, int rows, int cols)
+  {
+    grid g;
+    float unit_height = total_area.height / (rows * cols);
+    float unit_width = total_area.width / (rows * cols);
+    int r = 0, c = 0;
+    g.resize(rows);
+    for (auto& row : g)
+    {
+      row.resize(cols);
+      for (auto& col : row)
+      {
+        col.height = unit_height;
+        col.width = unit_width;
+        col.left = total_area.left + c * unit_width;
+        col.top = total_area.top + r * unit_height;
+        c ++;
+      }
+      r ++;
+    }
+    return g;
+  }
+
+  sf::Text prepare_text(const std::string& str, sf::Vector2f position, unsigned int size = 16)
   {
     sf::Text text;
     text.setFont(m_font);
     text.setString(str);
-    text.setCharacterSize(16); // in pixels, not points!
+    text.setCharacterSize(size); // in pixels, not points!
     text.setFillColor(sf::Color::Red);
     text.setPosition(position);
     return text;
   }
 
-  void render_information(sf::Vector2f position)
+  void render_information(sf::FloatRect area)
   {
     std::stringstream ss;
-    ss << "press:\n"
-       << "p ==> stepping mode\n"
-       << "s ==> start/stop simulation\n"
-       << "t ==> resume simulation after stepping mode\n"
-       << "q ==> exit\n"
-       << get_time();
-    sf::Text info_text = prepare_text(ss.str(), position);
+    ss << std::setw(64) << std::internal << "iteration: " << m_world.get_time() << "\n"
+       << std::setw(64) << std::right << "p ==> stepping mode" << "\n"
+       << std::setw(64) << std::right << "s ==> start/stop simulation" << "\n"
+       << std::setw(64) << std::right << "t ==> disable stepping" << "\n"
+       << std::setw(64) << std::right << "q ==> exit" << "\n"
+       << std::setw(64) << std::right << get_time();
+    sf::Text info_text = prepare_text(ss.str(), sf::Vector2f(area.left, area.top), 10);
+    sf::FloatRect bounds = info_text.getLocalBounds();
+    info_text.setPosition(area.left + area.width - bounds.width - 10, area.top + area.height - bounds.height);
     m_window.draw(info_text);
-  }
-
-  void render_world_time(sf::Vector2f position)
-  {
-    std::stringstream ss;
-    ss << "ITERATION: " << m_world.get_time();
-    m_window.draw(prepare_text(ss.str(), position));
   }
 
   void render_object_prices(sf::Vector2f position)
@@ -177,12 +218,25 @@ public:
 
   void render_actors(sf::FloatRect area)
   {
+    int rows = 2, cols = 2;
+    grid area_grid = split_area(area, rows, cols);
+    int row = 0, col = 0;
     double total_money = 0.f;
     for (auto actor : m_world.get_actors())
     {
       total_money += actor.get_cash() + actor.get_reserved_cash();
-      actor_panel actors_drawing(actor, m_world, area, m_font);
+      actor_panel<world> actors_drawing(actor, m_world, area_grid[row][col], m_font);
       m_window.draw(actors_drawing);
+      col ++;
+      if (col == cols)
+      {
+        col = 0;
+        row ++;
+        if (row == rows)
+        {
+          break;
+        }
+      }
     }
     std::stringstream ss;
     ss << "total money is: " << total_money << "\n";
@@ -257,25 +311,6 @@ public:
       m_window.draw(prepare_text(ss.str(), position));
       position.y += 16;
     }
-  }
-
-  void render_world()
-  {
-    sf::RectangleShape shape(sf::Vector2f(800, 600));
-    shape.setFillColor(sf::Color::White);
-    m_window.draw(shape);
-
-    render_information(sf::Vector2f(600, 500));
-
-    render_world_time(sf::Vector2f(400, 20));
-
-    render_object_prices(sf::Vector2f(600, 20));
-
-    render_transactions(sf::Vector2f(20, 500));
-
-    render_actors(sf::FloatRect(0, 0, 600, 200));
-
-    render_orders(sf::Vector2f(20, 200));
   }
 
 private:

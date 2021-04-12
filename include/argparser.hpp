@@ -23,6 +23,13 @@ public:
         return def;
     }
 
+    int get_long(const std::string &option, const long def = 0) const
+    {
+        char **itr = std::find(begin, end, option);
+        if (itr != end && ++itr != end) return (long)std::stold(*itr);
+        return def;
+    }
+
     bool exists(const std::string &option) const
     {
       return std::find(begin, end, option) != end;
