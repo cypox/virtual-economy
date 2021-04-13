@@ -1,7 +1,9 @@
 #pragma once
 
-#include "object.hpp"
+#include "include/object.hpp"
 
+#include <sstream>
+#include <iomanip>
 #include <SFML/Graphics.hpp>
 
 
