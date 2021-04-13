@@ -44,7 +44,7 @@ public:
     m_order_text.setString(ss.str());
     m_order_text.setCharacterSize(10);
     m_order_text.setFillColor(sf::Color::Red);
-    m_order_text.setPosition(sf::Vector2f(area.left, area.top));
+    m_order_text.setPosition(area.left, area.top);
 
     sf::FloatRect bounds = m_order_text.getLocalBounds();
     sf::Vector2f bottom_right(area.left + bounds.width, area.top + bounds.height);
@@ -57,13 +57,13 @@ public:
       sf::RenderTexture rt;
       rt.create(area.width, area.height);
 
-      m_order_text.setPosition(sf::Vector2f(0, 0));
+      m_order_text.setPosition(0, 0);
       rt.draw(m_order_text, states);
       rt.display();
 
       sf::Sprite sprite;
       sprite.setTexture(rt.getTexture());
-      sprite.setPosition(sf::Vector2f(area.left, area.top));
+      sprite.setPosition(area.left, area.top);
 
       target.draw(sprite, states);
     }
@@ -90,7 +90,7 @@ public:
     m_order_text.setString(ss.str());
     m_order_text.setCharacterSize(10);
     m_order_text.setFillColor(sf::Color::Red);
-    m_order_text.setPosition(sf::Vector2f(area.left, area.top));
+    m_order_text.setPosition(area.left, area.top);
 
     sf::FloatRect bounds = m_order_text.getLocalBounds();
     sf::Vector2f bottom_right(area.left + bounds.width, area.top + bounds.height);
@@ -103,13 +103,13 @@ public:
       sf::RenderTexture rt;
       rt.create(area.width, area.height);
 
-      m_order_text.setPosition(sf::Vector2f(0, 0));
+      m_order_text.setPosition(0, 0);
       rt.draw(m_order_text, states);
       rt.display();
 
       sf::Sprite sprite;
       sprite.setTexture(rt.getTexture());
-      sprite.setPosition(sf::Vector2f(area.left, area.top));
+      sprite.setPosition(area.left, area.top);
 
       target.draw(sprite, states);
     }

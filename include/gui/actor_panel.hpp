@@ -42,7 +42,7 @@ public:
     m_actor_text.setCharacterSize(10);
     m_actor_text.setFillColor(sf::Color::Red);
     m_actor_text.setString(ss.str());
-    m_actor_text.setPosition(sf::Vector2f(area.left, area.top));
+    m_actor_text.setPosition(area.left, area.top);
     target.draw(m_actor_text);
   }
 

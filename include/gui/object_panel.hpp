@@ -29,7 +29,7 @@ public:
       for (int i = 0 ; i < m_num_objects ; ++ i)
       {
         object o = m_world.get_objects()[i];
-        if (m_price_history[i].size() == m_graph_width)
+        if (m_price_history[i].size() == m_graph_width_resolution)
         {
           m_price_history[i].pop_front();
           m_price_history[i].emplace_back(m_last_timestep, o.get_price());
@@ -46,7 +46,7 @@ public:
   {
     std::deque<std::pair<unsigned, double>> points = m_price_history[obj.get_id()];
     float x_0 = area.left, y_0 = area.top;
-    float x_increment = area.width/m_graph_width, y_increment = area.height/m_graph_height;
+    float x_increment = area.width/(m_graph_width_resolution-1), y_increment = area.height/m_graph_height_resolution;
     int idx = 0;
     for (auto it = points.begin() ; it != points.end() && it + 1 != points.end() ; ++ it)
     {
@@ -61,16 +61,23 @@ public:
       target.draw(segment, 2, sf::Lines, states);
       ++ idx;
     }
+    std::stringstream ss;
+    ss << std::setw(6) << std::setprecision(4) << obj.get_price() << " $\n";
+    sf::Text objects_text;
+    objects_text.setFont(*m_font);
+    objects_text.setString(ss.str());
+    objects_text.setCharacterSize(10);
+    objects_text.setFillColor(sf::Color::Red);
+    objects_text.setPosition(area.left + area.width/2 - objects_text.getLocalBounds().width/2, area.top);
+    target.draw(objects_text, states);
   }
 
 private:
   virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const
   {
-    std::stringstream ss;
     int row = 0, col = 0;
     for (auto obj : m_world.get_objects())
     {
-      ss << obj.get_id() << " : " << std::setw(6) << std::setprecision(4) << obj.get_price() << " $\n";
       draw_graph(obj, m_area_grid.get_area(row, col), target, states);
       col ++;
       if (col == m_area_grid.get_cols())
@@ -83,19 +90,12 @@ private:
         }
       }
     }
-    sf::Text objects_text;
-    objects_text.setFont(*m_font);
-    objects_text.setString(ss.str());
-    objects_text.setCharacterSize(10); // in pixels, not points!
-    objects_text.setFillColor(sf::Color::Red);
-    objects_text.setPosition(sf::Vector2f(m_area->left, m_area->top));
-    target.draw(objects_text, states);
   }
 
   size_t m_num_objects;
   unsigned m_last_timestep = 0;
-  int m_graph_width = 100;
-  int m_graph_height = 50;
+  int m_graph_width_resolution = 100;
+  int m_graph_height_resolution = 50;
   std::vector<std::deque<std::pair<unsigned, double>>> m_price_history;
   const world& m_world;
   grid m_area_grid;
