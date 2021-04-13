@@ -2,6 +2,7 @@
 
 #include "include/gui/actor_panel.hpp"
 #include "include/gui/object_panel.hpp"
+#include "include/gui/order_panel.hpp"
 
 #include <cmath>
 #include <sys/time.h>
@@ -34,7 +35,7 @@ class render {
 public:
   render() = delete;
 
-  render(sf::RenderWindow& window, const world& w) : m_window(window), m_world(w), m_object_panel(w), m_actor_panel(w)
+  render(sf::RenderWindow& window, const world& w) : m_window(window), m_world(w), m_object_panel(w), m_actor_panel(w), m_order_panel(w)
   {
     if (!m_font.loadFromFile("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf"))
     {
@@ -178,54 +179,8 @@ public:
   {
     draw_background(area, sf::Color::Black, sf::Color::White);
 
-    sf::Vector2f position(area.left, area.top);
-    std::stringstream ss;
-    float initial_y = position.y;
-    for (auto o : m_world.get_objects())
-    {
-      object_id oid = o.get_id();
-      auto order_map = m_world.get_market().get_buy_order_list();
-      int buy_size = 0;
-      if (order_map.count(oid) > 0)
-      {
-        buy_size = order_map.at(oid).size();
-        ss.str("");
-        ss << "#BUY" << oid << " has " << buy_size;
-        m_window.draw(prepare_text(ss.str(), position));
-        position.y += 16;
-        for (auto o : order_map.at(oid))
-        {
-          ss.str("");
-          ss << o.get_actor_id() << "@" << o.get_strike();
-          m_window.draw(prepare_text(ss.str(), position));
-          position.y += 16;
-        }
-      }
-
-      position.y = initial_y;
-      position.x += 128;
-
-      order_map = m_world.get_market().get_sell_order_list();
-      int sell_size = 0;
-      if (order_map.count(oid) > 0)
-      {
-        sell_size = order_map.at(oid).size();
-        ss.str("");
-        ss << "#SELL" << oid << " has " << sell_size;
-        m_window.draw(prepare_text(ss.str(), position));
-        position.y += 16;
-        for (auto o : order_map.at(oid))
-        {
-          ss.str("");
-          ss << o.get_actor_id() << "@" << o.get_strike();
-          m_window.draw(prepare_text(ss.str(), position));
-          position.y += 16;
-        }
-      }
-
-      position.x += 128;
-      position.y = initial_y;
-    }
+    m_order_panel.update(&area, &m_font, 1, 4);
+    m_window.draw(m_order_panel);
   }
 
   void render_transactions(sf::FloatRect area)
@@ -251,6 +206,7 @@ public:
 private:
   object_panel<world> m_object_panel;
   actor_panel<world> m_actor_panel;
+  order_panel<world> m_order_panel;
   sf::RenderWindow& m_window;
   const world& m_world;
   sf::Font m_font;

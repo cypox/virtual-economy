@@ -54,7 +54,7 @@ private:
     {
       draw_single_actor(actor, m_area_grid.get_area(row, col), target, states);
       col ++;
-      if (col == m_area_grid.get_rows())
+      if (col == m_area_grid.get_cols())
       {
         col = 0;
         row ++;
