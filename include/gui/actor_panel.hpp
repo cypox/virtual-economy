@@ -35,7 +35,7 @@ public:
     for (auto obj : m_world.get_objects())
     {
       object_id oid = obj.get_id();
-      //ss << oid << " : " << m_actor.get_stock(oid) << " units and " << m_actor.get_reserve(oid) << " in reserve\n";
+      //ss << oid << " : " << act.get_stock(oid) << " units and " << act.get_reserve(oid) << " in reserve\n";
     }
     sf::Text m_actor_text;
     m_actor_text.setFont(*m_font);
@@ -43,7 +43,29 @@ public:
     m_actor_text.setFillColor(sf::Color::Red);
     m_actor_text.setString(ss.str());
     m_actor_text.setPosition(area.left, area.top);
-    target.draw(m_actor_text);
+    
+    sf::FloatRect bounds = m_actor_text.getLocalBounds();
+    sf::Vector2f bottom_right(area.left + bounds.width, area.top + bounds.height);
+
+    if (area.contains(bottom_right))
+    {
+      target.draw(m_actor_text, states);
+    }
+    else
+    {
+      sf::RenderTexture rt;
+      rt.create(area.width, area.height);
+
+      m_actor_text.setPosition(0, 0);
+      rt.draw(m_actor_text, states);
+      rt.display();
+
+      sf::Sprite sprite;
+      sprite.setTexture(rt.getTexture());
+      sprite.setPosition(area.left, area.top);
+
+      target.draw(sprite, states);
+    }
   }
 
 private:
