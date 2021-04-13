@@ -1,7 +1,7 @@
 #pragma once
 
-#include "actor_panel.hpp"
-#include "object_panel.hpp"
+#include "include/gui/actor_panel.hpp"
+#include "include/gui/object_panel.hpp"
 
 #include <cmath>
 #include <sys/time.h>
@@ -32,11 +32,9 @@ char* get_time()
 template<class world>
 class render {
 public:
-  using grid = std::vector<std::vector<sf::FloatRect>>;
-
   render() = delete;
 
-  render(sf::RenderWindow& window, const world& w) : m_window(window), m_world(w), m_object_drawing(w)
+  render(sf::RenderWindow& window, const world& w) : m_window(window), m_world(w), m_object_panel(w), m_actor_panel(w)
   {
     if (!m_font.loadFromFile("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf"))
     {
@@ -118,30 +116,6 @@ public:
     render_orders(sf::FloatRect(0, 200, 800, 300));
   }
 
-  grid split_area(const sf::FloatRect& total_area, int rows, int cols)
-  {
-    grid g;
-    float unit_height = total_area.height / rows;
-    float unit_width = total_area.width / cols;
-    int r = 0, c = 0;
-    g.resize(rows);
-    for (auto& row : g)
-    {
-      row.resize(cols);
-      for (auto& col : row)
-      {
-        col.height = unit_height;
-        col.width = unit_width;
-        col.left = total_area.left + c * unit_width;
-        col.top = total_area.top + r * unit_height;
-        c ++;
-      }
-      r ++;
-      c = 0;
-    }
-    return g;
-  }
-
   void draw_background(sf::FloatRect area, sf::Color outline, sf::Color fill = sf::Color::Transparent)
   {
     sf::RectangleShape background(sf::Vector2f(area.width, area.height));
@@ -188,39 +162,16 @@ public:
   {
     draw_background(area, sf::Color::Black, sf::Color::Green);
 
-    m_object_drawing.update(&area, &m_font);
-    m_window.draw(m_object_drawing);
+    m_object_panel.update(&area, &m_font);
+    m_window.draw(m_object_panel);
   }
 
   void render_actors(sf::FloatRect area)
   {
     draw_background(area, sf::Color::Black, sf::Color::Yellow);
 
-    int rows = 4, cols = 4;
-    grid area_grid = split_area(area, rows, cols);
-    int row = 0, col = 0;
-    double total_money = 0.f;
-    for (auto actor : m_world.get_actors())
-    {
-      total_money += actor.get_cash() + actor.get_reserved_cash();
-      actor_panel<world> actors_drawing(actor, m_world, area_grid[row][col], m_font);
-      m_window.draw(actors_drawing);
-      col ++;
-      if (col == cols)
-      {
-        col = 0;
-        row ++;
-        if (row == rows)
-        {
-          break;
-        }
-      }
-    }
-    std::stringstream ss;
-    ss << "total money is: " << total_money << "\n";
-    sf::Vector2f draw_position(area.left + (area.width / 2), area.top + area.height - 10);
-    sf::Text total_money_text = prepare_text(ss.str(), draw_position);
-    m_window.draw(total_money_text);
+    m_actor_panel.update(&area, &m_font, 4, 4);
+    m_window.draw(m_actor_panel);
   }
 
   void render_orders(sf::FloatRect area)
@@ -298,7 +249,8 @@ public:
   }
 
 private:
-  object_panel<world> m_object_drawing;
+  object_panel<world> m_object_panel;
+  actor_panel<world> m_actor_panel;
   sf::RenderWindow& m_window;
   const world& m_world;
   sf::Font m_font;

@@ -91,8 +91,8 @@ private:
   }
 
   unsigned m_last_timestep = 0;
-  int m_graph_width = 10;
-  int m_graph_height = 100;
+  int m_graph_width = 100;
+  int m_graph_height = 50;
   std::vector<std::deque<std::pair<unsigned, double>>> m_price_history;
   const world& m_world;
   const sf::FloatRect* m_area;
