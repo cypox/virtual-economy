@@ -14,18 +14,19 @@ class object_panel : public sf::Drawable {
 public:
   object_panel(const world& w) : m_world(w)
   {
-    m_price_history.resize(m_world.get_objects().size());
+    m_num_objects = m_world.get_objects().size();
+    m_price_history.resize(m_num_objects);
   };
 
   void update(const sf::FloatRect* area, const sf::Font* font)
   {
     m_area = area;
     m_font = font;
+    m_area_grid = grid(*m_area, m_num_objects, 1);
     if (m_last_timestep != m_world.get_time())
     {
       m_last_timestep = m_world.get_time();
-      size_t num_objects = m_world.get_objects().size();
-      for (int i = 0 ; i < num_objects ; ++ i)
+      for (int i = 0 ; i < m_num_objects ; ++ i)
       {
         object o = m_world.get_objects()[i];
         if (m_price_history[i].size() == m_graph_width)
@@ -41,9 +42,9 @@ public:
     }
   }
 
-  void draw_graph(sf::RenderTarget& target, sf::RenderStates& states, const sf::FloatRect& area) const
+  void draw_graph(const object& obj, const sf::FloatRect& area, sf::RenderTarget& target, sf::RenderStates& states) const
   {
-    std::deque<std::pair<unsigned, double>> points = m_price_history[0];
+    std::deque<std::pair<unsigned, double>> points = m_price_history[obj.get_id()];
     float x_0 = area.left, y_0 = area.top;
     float x_increment = area.width/m_graph_width, y_increment = area.height/m_graph_height;
     int idx = 0;
@@ -53,7 +54,6 @@ public:
       float x2 = area.left + (idx + 1) * x_increment;
       float y1 = area.top + area.height - it->second * y_increment;
       float y2 = area.top + area.height - (it+1)->second * y_increment;
-      //printf("(%f, %f) -> (%f, %f)\n", x1, y1, x2, y2);
       sf::Vertex segment[2] = {
         {{x1, y1}, sf::Color::Black},
         {{x2, y2}, sf::Color::Black}
@@ -63,38 +63,42 @@ public:
     }
   }
 
-  inline sf::Vector2f get_position() const
-  {
-    return sf::Vector2f(m_area->left, m_area->top);
-  }
-
 private:
   virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const
   {
-    sf::FloatRect graph_area = *m_area;
-    graph_area.height /= 2;
-    graph_area.top = graph_area.top + graph_area.height;
-    draw_graph(target, states, graph_area);
-
     std::stringstream ss;
+    int row = 0, col = 0;
     for (auto obj : m_world.get_objects())
     {
       ss << obj.get_id() << " : " << std::setw(6) << std::setprecision(4) << obj.get_price() << " $\n";
+      draw_graph(obj, m_area_grid.get_area(row, col), target, states);
+      col ++;
+      if (col == m_area_grid.get_cols())
+      {
+        col = 0;
+        row ++;
+        if (row == m_area_grid.get_rows())
+        {
+          break;
+        }
+      }
     }
     sf::Text objects_text;
     objects_text.setFont(*m_font);
     objects_text.setString(ss.str());
     objects_text.setCharacterSize(10); // in pixels, not points!
     objects_text.setFillColor(sf::Color::Red);
-    objects_text.setPosition(get_position());
+    objects_text.setPosition(sf::Vector2f(m_area->left, m_area->top));
     target.draw(objects_text, states);
   }
 
+  size_t m_num_objects;
   unsigned m_last_timestep = 0;
   int m_graph_width = 100;
   int m_graph_height = 50;
   std::vector<std::deque<std::pair<unsigned, double>>> m_price_history;
   const world& m_world;
+  grid m_area_grid;
   const sf::FloatRect* m_area;
   const sf::Font* m_font;
 };
