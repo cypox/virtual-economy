@@ -1,0 +1,10 @@
+language: cpp
+compiler:
+  - g++
+before_script:
+  - sudo apt-get install libsfml-dev
+script:
+  - mkdir build
+  - cd build
+  - cmake ..
+  - make -j 4
