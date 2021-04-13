@@ -3,6 +3,7 @@
 #include "include/order.hpp"
 #include "include/gui/grid.hpp"
 
+#include <iostream>
 #include <sstream>
 #include <SFML/Graphics.hpp>
 
@@ -29,11 +30,11 @@ public:
     object_id oid = o.get_id();
     auto order_map = m_world.get_market().get_buy_order_list();
     int buy_size = 0;
+    ss << "#BUY" << oid;
     if (order_map.count(oid) > 0)
     {
       buy_size = order_map.at(oid).size();
-      ss.str("");
-      ss << "#BUY" << oid << " has " << buy_size << "\n";
+      ss << " has " << buy_size << "\n";
       for (auto o : order_map.at(oid))
       {
         ss << o.get_actor_id() << "@" << o.get_strike() << "\n";
@@ -41,18 +42,40 @@ public:
     }
     m_order_text.setFont(*m_font);
     m_order_text.setString(ss.str());
-    m_order_text.setCharacterSize(10); // in pixels, not points!
+    m_order_text.setCharacterSize(10);
     m_order_text.setFillColor(sf::Color::Red);
     m_order_text.setPosition(sf::Vector2f(area.left, area.top));
-    target.draw(m_order_text, states);
+
+    sf::FloatRect bounds = m_order_text.getLocalBounds();
+    sf::Vector2f bottom_right(area.left + bounds.width/2, area.top + bounds.height);
+    if (area.contains(bottom_right))
+    {
+      target.draw(m_order_text, states);
+    }
+    else
+    {
+      sf::RenderTexture rt;
+      rt.create(area.width/2, area.height);
+
+      m_order_text.setPosition(sf::Vector2f(0, 0));
+      rt.draw(m_order_text, states);
+      rt.display();
+
+      sf::Sprite sprite;
+      sprite.setTexture(rt.getTexture());
+      sprite.setPosition(sf::Vector2f(area.left, area.top));
+
+      target.draw(sprite, states);
+    }
 
     ss.str("");
     order_map = m_world.get_market().get_sell_order_list();
     int sell_size = 0;
+    ss << "#SELL" << oid;
     if (order_map.count(oid) > 0)
     {
       sell_size = order_map.at(oid).size();
-      ss << "#SELL" << oid << " has " << sell_size << "\n";
+      ss << " has " << sell_size << "\n";
       for (auto o : order_map.at(oid))
       {
         ss << o.get_actor_id() << "@" << o.get_strike() << "\n";
@@ -61,7 +84,28 @@ public:
 
     m_order_text.setString(ss.str());
     m_order_text.setPosition(sf::Vector2f(area.left + area.width/2, area.top));
-    target.draw(m_order_text, states);
+
+    bounds = m_order_text.getLocalBounds();
+    bottom_right = sf::Vector2f(area.left + bounds.width/2, area.top + bounds.height);
+    if (area.contains(bottom_right))
+    {
+      target.draw(m_order_text, states);
+    }
+    else
+    {
+      sf::RenderTexture rt;
+      rt.create(area.width/2, area.height);
+
+      m_order_text.setPosition(sf::Vector2f(0, 0));
+      rt.draw(m_order_text, states);
+      rt.display();
+
+      sf::Sprite sprite;
+      sprite.setTexture(rt.getTexture());
+      sprite.setPosition(sf::Vector2f(area.left + area.width/2, area.top));
+
+      target.draw(sprite, states);
+    }
   }
 
 private:
