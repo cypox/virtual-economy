@@ -187,7 +187,7 @@ public:
   {
     draw_background(area, sf::Color::Black, sf::Color::White);
 
-    m_order_panel.update(&area, &m_font, 1, 4);
+    m_order_panel.update(&area, &m_font, 1, 6);
     m_window.draw(m_order_panel);
   }
 

@@ -22,7 +22,7 @@ public:
     m_area_grid = grid(*m_area, rows, cols);
   }
 
-  void draw_single_order(const object& o, const sf::FloatRect& area, sf::RenderTarget& target, sf::RenderStates states) const
+  void draw_buys(const object& o, const sf::FloatRect& area, sf::RenderTarget& target, sf::RenderStates states) const
   {
     sf::Text m_order_text;
 
@@ -47,7 +47,7 @@ public:
     m_order_text.setPosition(sf::Vector2f(area.left, area.top));
 
     sf::FloatRect bounds = m_order_text.getLocalBounds();
-    sf::Vector2f bottom_right(area.left + bounds.width/2, area.top + bounds.height);
+    sf::Vector2f bottom_right(area.left + bounds.width, area.top + bounds.height);
     if (area.contains(bottom_right))
     {
       target.draw(m_order_text, states);
@@ -55,7 +55,7 @@ public:
     else
     {
       sf::RenderTexture rt;
-      rt.create(area.width/2, area.height);
+      rt.create(area.width, area.height);
 
       m_order_text.setPosition(sf::Vector2f(0, 0));
       rt.draw(m_order_text, states);
@@ -67,9 +67,14 @@ public:
 
       target.draw(sprite, states);
     }
+  }
 
-    ss.str("");
-    order_map = m_world.get_market().get_sell_order_list();
+  void draw_sells(const object& o, const sf::FloatRect& area, sf::RenderTarget& target, sf::RenderStates states) const
+  {
+    sf::Text m_order_text;
+    std::stringstream ss("");
+    object_id oid = o.get_id();
+    auto order_map = m_world.get_market().get_sell_order_list();
     int sell_size = 0;
     ss << "#SELL" << oid;
     if (order_map.count(oid) > 0)
@@ -81,12 +86,14 @@ public:
         ss << o.get_actor_id() << "@" << o.get_strike() << "\n";
       }
     }
-
+    m_order_text.setFont(*m_font);
     m_order_text.setString(ss.str());
-    m_order_text.setPosition(sf::Vector2f(area.left + area.width/2, area.top));
+    m_order_text.setCharacterSize(10);
+    m_order_text.setFillColor(sf::Color::Red);
+    m_order_text.setPosition(sf::Vector2f(area.left, area.top));
 
-    bounds = m_order_text.getLocalBounds();
-    bottom_right = sf::Vector2f(area.left + bounds.width/2, area.top + bounds.height);
+    sf::FloatRect bounds = m_order_text.getLocalBounds();
+    sf::Vector2f bottom_right(area.left + bounds.width, area.top + bounds.height);
     if (area.contains(bottom_right))
     {
       target.draw(m_order_text, states);
@@ -94,7 +101,7 @@ public:
     else
     {
       sf::RenderTexture rt;
-      rt.create(area.width/2, area.height);
+      rt.create(area.width, area.height);
 
       m_order_text.setPosition(sf::Vector2f(0, 0));
       rt.draw(m_order_text, states);
@@ -102,10 +109,19 @@ public:
 
       sf::Sprite sprite;
       sprite.setTexture(rt.getTexture());
-      sprite.setPosition(sf::Vector2f(area.left + area.width/2, area.top));
+      sprite.setPosition(sf::Vector2f(area.left, area.top));
 
       target.draw(sprite, states);
     }
+  }
+
+  void draw_single_order(const object& o, const sf::FloatRect& area, sf::RenderTarget& target, sf::RenderStates states) const
+  {
+    sf::FloatRect left = area, right = area;
+    left.width = right.width = area.width/2;
+    right.left = area.left + left.width;
+    draw_buys(o, left, target, states);
+    draw_sells(o, right, target, states);
   }
 
 private:
