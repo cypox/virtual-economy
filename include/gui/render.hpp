@@ -1,6 +1,7 @@
 #pragma once
 
 #include "actor_panel.hpp"
+#include "object_panel.hpp"
 
 #include <cmath>
 #include <sys/time.h>
@@ -187,14 +188,8 @@ public:
   {
     draw_background(area, sf::Color::Black, sf::Color::Green);
 
-    sf::Vector2f position(area.left, area.top);
-    for (auto obj : m_world.get_objects())
-    {
-      std::stringstream ss;
-      ss << obj.get_id() << " : " << std::setw(6) << std::setprecision(4) << obj.get_price() << " $";
-      m_window.draw(prepare_text(ss.str(), position));
-      position.y += 16;
-    }
+    object_panel<world> objects_drawing(m_world, area, m_font);
+    m_window.draw(objects_drawing);
   }
 
   void render_actors(sf::FloatRect area)
