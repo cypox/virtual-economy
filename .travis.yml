@@ -1,10 +1,31 @@
 language: cpp
-compiler:
-  - g++-9
+os: linux
+dist: focal
+sudo: false
+
+branches:
+  only:
+  - master
+
+matrix:
+  include:
+    - compiler: gcc
+      addons:
+        apt:
+          sources:
+            - sourceline: 'ppa:ubuntu-toolchain-r/test'
+          packages:
+            - g++-9
+      env:
+        - MATRIX_EVAL="CC=gcc-9 && CXX=g++-9"
+
+    - compiler: clang
+      env:
+        - MATRIX_EVAL="CC=clang && CXX=clang++"
+
 before_script:
-  - sudo apt update
-  - sudo apt install build-essential
-  - sudo apt install gcc-9
-  - sudo apt-get install libsfml-dev
+  - sudo apt update -qq
+  - sudo apt install libsfml-dev
+
 script:
   - make -j 4
