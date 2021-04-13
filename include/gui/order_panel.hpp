@@ -34,13 +34,9 @@ public:
       buy_size = order_map.at(oid).size();
       ss.str("");
       ss << "#BUY" << oid << " has " << buy_size << "\n";
-      //m_window.draw(prepare_text(ss.str(), position));
-      //position.y += 16;
       for (auto o : order_map.at(oid))
       {
         ss << o.get_actor_id() << "@" << o.get_strike() << "\n";
-        //m_window.draw(prepare_text(ss.str(), position));
-        //position.y += 16;
       }
     }
     m_order_text.setFont(*m_font);
@@ -57,13 +53,9 @@ public:
     {
       sell_size = order_map.at(oid).size();
       ss << "#SELL" << oid << " has " << sell_size << "\n";
-      //m_window.draw(prepare_text(ss.str(), position));
-      //position.y += 16;
       for (auto o : order_map.at(oid))
       {
         ss << o.get_actor_id() << "@" << o.get_strike() << "\n";
-        //m_window.draw(prepare_text(ss.str(), position));
-        //position.y += 16;
       }
     }
 
