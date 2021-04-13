@@ -102,6 +102,9 @@ public:
 
   void render_world()
   {
+    struct timeval start, end;
+    gettimeofday(&start, nullptr);
+
     sf::RectangleShape shape(sf::Vector2f(m_window.getSize().x, m_window.getSize().y));
     shape.setFillColor(sf::Color::White);
     m_window.draw(shape);
@@ -115,6 +118,9 @@ public:
     render_actors(sf::FloatRect(0, 0, 600, 200));
 
     render_orders(sf::FloatRect(0, 200, 800, 300));
+
+    gettimeofday(&end, nullptr);
+    m_render_time = (end.tv_sec * 1000000 + end.tv_usec) - (start.tv_sec * 1000000 + start.tv_usec);
   }
 
   void draw_background(sf::FloatRect area, sf::Color outline, sf::Color fill = sf::Color::Transparent)
@@ -150,7 +156,9 @@ public:
        << "iteration:"
        << std::setw(20) << std::right << m_world.get_time() << "\n"
        << "last iteration time:"
-       << std::setw(10) << std::right << m_world.get_iteration_time() / 1000 << "\n"
+       << std::setw(8) << std::right << m_world.get_iteration_time() / 1000.f << std::setw(2) << "ms\n"
+       << "render time:"
+       << std::setw(16) << std::right << m_render_time / 1000.f << std::setw(2) << "ms\n"
        << "time:"
        << std::setw(25) << std::right << get_time() << "\n";
     sf::Text info_text = prepare_text(ss.str(), sf::Vector2f(area.left, area.top), 8);
@@ -210,4 +218,5 @@ private:
   sf::RenderWindow& m_window;
   const world& m_world;
   sf::Font m_font;
+  long m_render_time = 0;
 };
