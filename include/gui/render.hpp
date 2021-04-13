@@ -105,19 +105,33 @@ public:
     struct timeval start, end;
     gettimeofday(&start, nullptr);
 
-    sf::RectangleShape shape(sf::Vector2f(m_window.getSize().x, m_window.getSize().y));
+    sf::Vector2u window_size = m_window.getSize();
+    sf::RectangleShape shape(sf::Vector2f(window_size.x, window_size.y));
     shape.setFillColor(sf::Color::White);
     m_window.draw(shape);
 
-    render_information(sf::FloatRect(600, 500, 200, 100));
+    unsigned int x = window_size.x;
+    unsigned int y = window_size.y;
+    unsigned int half_x = window_size.x / 2;
+    unsigned int half_y = window_size.y / 2;
+    unsigned int third_x = window_size.x / 3;
+    unsigned int third_y = window_size.y / 3;
+    unsigned int fourth_x = window_size.x / 4;
+    unsigned int fourth_y = window_size.y / 4;
+    unsigned int fifth_x = window_size.x / 5;
+    unsigned int fifth_y = window_size.y / 5;
+    unsigned int sixth_x = window_size.x / 6;
+    unsigned int sixth_y = window_size.y / 6;
 
-    render_object_prices(sf::FloatRect(600, 0, 200, 200));
+    render_information(sf::FloatRect(3 * fourth_x, 5 * sixth_y, fourth_x, sixth_y));
 
-    render_transactions(sf::FloatRect(0, 500, 600, 100));
+    render_object_prices(sf::FloatRect(3 * fourth_x, 0, fourth_x, third_y));
 
-    render_actors(sf::FloatRect(0, 0, 600, 200));
+    render_transactions(sf::FloatRect(0, 5 * sixth_y, 3 * fourth_x, sixth_y));
 
-    render_orders(sf::FloatRect(0, 200, 800, 300));
+    render_actors(sf::FloatRect(0, 0, 3 * fourth_x, third_y));
+
+    render_orders(sf::FloatRect(0, third_y, x, half_y));
 
     gettimeofday(&end, nullptr);
     m_render_time = (end.tv_sec * 1000000 + end.tv_usec) - (start.tv_sec * 1000000 + start.tv_usec);

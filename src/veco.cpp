@@ -13,7 +13,7 @@ int main(int argc, char** argv)
 
   world_t simulation_world(rng_seed, starts_running || !no_stepping, !no_stepping);
   simulation_world.init();
-  sf::RenderWindow window(sf::VideoMode(800, 600), "VECO");
+  sf::RenderWindow window(sf::VideoMode(1500, 900), "VECO");
   window.setFramerateLimit(framerate);
 
   render<world_t> renderer(window, simulation_world);
