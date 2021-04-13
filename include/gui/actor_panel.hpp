@@ -14,8 +14,13 @@ class actor_panel : public sf::Drawable {
 public:
   actor_panel(const actor& act, const world& w, const sf::FloatRect& area, const sf::Font& font) : m_actor(act), m_world(w), m_area(area), m_font(font) {};
 
+  inline sf::Vector2f get_position() const
+  {
+    return sf::Vector2f(m_area.left, m_area.top);
+  }
+
 private:
-  virtual void draw(sf::RenderTarget& target,sf::RenderStates states) const
+  virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const
   {
     std::stringstream ss;
     ss << m_actor.get_id() << " : " << std::setprecision(8)
@@ -35,11 +40,6 @@ private:
     actor_text.setFillColor(sf::Color::Red);
     actor_text.setPosition(get_position());
     target.draw(actor_text);
-  }
-
-  inline sf::Vector2f get_position() const
-  {
-    return sf::Vector2f(m_area.left, m_area.top);
   }
 
   const actor& m_actor;

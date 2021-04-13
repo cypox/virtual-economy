@@ -36,7 +36,7 @@ public:
 
   render() = delete;
 
-  render(sf::RenderWindow& window, const world& w) : m_window(window), m_world(w)
+  render(sf::RenderWindow& window, const world& w) : m_window(window), m_world(w), m_object_drawing(w)
   {
     if (!m_font.loadFromFile("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf"))
     {
@@ -188,8 +188,8 @@ public:
   {
     draw_background(area, sf::Color::Black, sf::Color::Green);
 
-    object_panel<world> objects_drawing(m_world, area, m_font);
-    m_window.draw(objects_drawing);
+    m_object_drawing.update(&area, &m_font);
+    m_window.draw(m_object_drawing);
   }
 
   void render_actors(sf::FloatRect area)
@@ -298,6 +298,7 @@ public:
   }
 
 private:
+  object_panel<world> m_object_drawing;
   sf::RenderWindow& m_window;
   const world& m_world;
   sf::Font m_font;
