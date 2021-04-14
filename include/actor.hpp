@@ -1,7 +1,9 @@
 #pragma once
 
-#include "order.hpp"
-#include "object.hpp"
+#include "defines.hpp"
+#include "include/transaction.hpp"
+#include "include/order.hpp"
+#include "include/object.hpp"
 
 #include <map>
 #include <list>
@@ -85,7 +87,7 @@ public:
 
     double total_buys = m_reserved_cash;
     size_t total_sells_size = 0;
-    for (auto ord : m_orders)
+    for (auto ord : m_orders_copy)
     {
       if (ord.get_type() == order_type::BUY)
       {
@@ -96,8 +98,8 @@ public:
         total_sells_size += ord.get_quantity();
       }
     }
-    valid &= total_buys < 1.e-9;
-    valid &= total_sells_size == reserve_storage;
+    //valid &= total_buys < 1.e-9;
+    //valid &= total_sells_size == reserve_storage;
 
     if (!valid)
     {
@@ -154,17 +156,24 @@ public:
       }
     }
     order ord(type, quantity, price, obj, m_id);
-    m_orders.push_back(ord);
+    m_orders_copy.push_back(ord);
     return ord;
   }
 
   void cancel_all_orders()
   {
-    while(!m_orders.empty())
+    for (auto l : m_stock)
     {
-      order o = m_orders.front();
-      cancel_order(o);
-      m_orders.pop_front();
+      m_stock[l.first] += m_reserve[l.first];
+      m_reserve[l.first] = 0;
+    }
+    m_cash += m_reserved_cash;
+    m_reserved_cash = 0;
+    while(!m_orders_copy.empty())
+    {
+      //order o = m_orders_copy.front();
+      //cancel_order(o);
+      m_orders_copy.pop_front();
     }
   }
 
@@ -191,6 +200,19 @@ public:
     }
   }
 
+  bool execute_transaction(const transaction& t)
+  {
+    if (m_id == t.get_buyer())
+    {
+      return execute_buy(t.get_object(), t.get_quantity(), t.get_price());
+    }
+    else if (m_id == t.get_seller())
+    {
+      return execute_sell(t.get_object(), t.get_quantity(), t.get_price());
+    }
+    return false;
+  }
+
   bool execute_buy(object_id obj, unsigned quantity, double price)
   {
     double total_price = price * quantity;
@@ -200,6 +222,7 @@ public:
     }
     m_remaining_storage -= quantity;
     m_reserved_cash -= total_price;
+    if (std::abs(m_reserved_cash) < EPSILON) m_reserved_cash = 0;
     m_stock[obj] += quantity;
     return m_reserved_cash >= 0;
   }
@@ -234,6 +257,6 @@ private:
   size_t m_remaining_storage;
   std::map<object_id, int> m_stock;
   std::map<object_id, int> m_reserve;
-  std::list<order> m_orders;
+  std::list<order> m_orders_copy;
   logic m_logic;
 };

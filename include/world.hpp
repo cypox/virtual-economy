@@ -130,22 +130,13 @@ public:
       return false;
     }
 
-    actor_id buyer = t.get_buyer();
-    actor_id seller = t.get_seller();
-
-    bool success = true;
-
-    success = m_actors[buyer].execute_buy(t.get_object(), t.get_quantity(), t.get_price());
-    if (success)
-    {
-      success = m_actors[seller].execute_sell(t.get_object(), t.get_quantity(), t.get_price());
-    }
+    bool success = m_actors[t.get_buyer()].execute_transaction(t) && m_actors[t.get_seller()].execute_transaction(t);
 
     if (success)
     {
       m_objects[t.get_object()].set_price(t.get_price());
       m_trsc_mtx.lock();
-      m_last_settled_transactions.push_back(m_last_transactions.front());
+      m_last_settled_transactions.push_back(t);
       m_trsc_mtx.unlock();
     }
     else
@@ -248,6 +239,16 @@ public:
     time = m_iter_microsecs;
     m_iter_us_mtx.unlock();
     return time;
+  }
+
+  double get_total_cash() const
+  {
+    double sum = 0.f;
+    for(const auto& a : m_actors)
+    {
+      sum += a.get_cash() + a.get_reserved_cash();
+    }
+    return sum;
   }
 
 private:

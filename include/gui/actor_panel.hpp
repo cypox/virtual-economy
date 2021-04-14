@@ -72,7 +72,7 @@ private:
   virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const
   {
     int row = 0, col = 0;
-    for (auto actor : m_world.get_actors())
+    for (const auto& actor : m_world.get_actors())
     {
       draw_single_actor(actor, m_area_grid.get_area(row, col), target, states);
       col ++;
@@ -86,6 +86,15 @@ private:
         }
       }
     }
+    sf::Text m_total_cash_text;
+    m_total_cash_text.setFont(*m_font);
+    m_total_cash_text.setCharacterSize(10);
+    m_total_cash_text.setFillColor(sf::Color::Red);
+    std::stringstream ss("");
+    ss << "total cash: " << m_world.get_total_cash();
+    m_total_cash_text.setString(ss.str());
+    m_total_cash_text.setPosition(m_area->left + m_area->width/2 - m_total_cash_text.getLocalBounds().width/2, m_area->top + m_area->height - m_total_cash_text.getLocalBounds().height - 10);
+    target.draw(m_total_cash_text, states);
   }
 
   const world& m_world;

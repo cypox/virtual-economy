@@ -1,8 +1,9 @@
 #pragma once
 
-#include "actor.hpp"
 #include "object.hpp"
 
+
+typedef unsigned actor_id;
 
 class transaction {
 public:
