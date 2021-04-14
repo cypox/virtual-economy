@@ -48,7 +48,7 @@ public:
   void generate_random_world()
   {
     unsigned n_objects = 4;
-    unsigned n_actors = 200;
+    unsigned n_actors = 10;
 
     m_objects.reserve(n_objects);
     m_produce_consume_rates.reserve(n_objects);
