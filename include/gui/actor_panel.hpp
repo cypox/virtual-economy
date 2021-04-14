@@ -72,6 +72,12 @@ private:
   virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const
   {
     int row = 0, col = 0;
+    /*
+    std::vector<actor>& actors = m_world.get_actors_copy();
+    std::sort(actors.begin(), actors.end(), [](const actor& first, const actor& second){
+      return first.get_total_cash() > second.get_total_cash();
+    });
+    */
     for (const auto& actor : m_world.get_actors())
     {
       draw_single_actor(actor, m_area_grid.get_area(row, col), target, states);

@@ -48,7 +48,7 @@ public:
   void generate_random_world()
   {
     unsigned n_objects = 4;
-    unsigned n_actors = 8;
+    unsigned n_actors = 200;
 
     m_objects.reserve(n_objects);
     m_produce_consume_rates.reserve(n_objects);
@@ -246,7 +246,7 @@ public:
     double sum = 0.f;
     for(const auto& a : m_actors)
     {
-      sum += a.get_cash() + a.get_reserved_cash();
+      sum += a.get_total_cash();
     }
     return sum;
   }

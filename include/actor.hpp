@@ -30,6 +30,11 @@ public:
     return m_remaining_storage;
   }
 
+  double get_total_cash() const
+  {
+    return m_cash + m_reserved_cash;
+  }
+
   double get_cash() const
   {
     return m_cash;
