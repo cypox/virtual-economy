@@ -45,6 +45,19 @@ public:
   void draw_graph(const object& obj, const sf::FloatRect& area, sf::RenderTarget& target, sf::RenderStates& states) const
   {
     std::deque<std::pair<unsigned, double>> points = m_price_history[obj.get_id()];
+    double min_price = INFINITY;
+    double max_price = -INFINITY;
+    for (auto it = points.begin() ; it != points.end() ; ++ it)
+    {
+      if(*it > max_price)
+      {
+        max_price = *it;
+      }
+      if(*it < min_price)
+      {
+        min_price = *it;
+      }
+    }
     float x_0 = area.left, y_0 = area.top;
     float x_increment = area.width/(m_graph_width_resolution-1), y_increment = area.height/m_graph_height_resolution;
     int idx = 0;
@@ -53,7 +66,7 @@ public:
       float x1 = area.left + idx * x_increment;
       float x2 = area.left + (idx + 1) * x_increment;
       float y1 = area.top + area.height - it->second * y_increment;
-      float y2 = area.top + area.height - (it+1)->second * y_increment;
+      float y2 = area.top + area.height - (((it+1)->second - min_price) / max_price) * area.height;
       sf::Vertex segment[2] = {
         {{x1, y1}, sf::Color::Black},
         {{x2, y2}, sf::Color::Black}
@@ -68,7 +81,7 @@ public:
     objects_text.setString(ss.str());
     objects_text.setCharacterSize(10);
     objects_text.setFillColor(sf::Color::Red);
-    objects_text.setPosition(area.left + area.width/2 - objects_text.getLocalBounds().width/2, area.top);
+    objects_text.setPosition(area.left + area.width - objects_text.getLocalBounds().width, area.top/2 - objects_text.getLocalBounds().height/2);
     target.draw(objects_text, states);
   }
 
