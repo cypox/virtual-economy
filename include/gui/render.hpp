@@ -175,7 +175,7 @@ public:
        << std::setw(16) << std::right << m_render_time / 1000.f << std::setw(2) << "ms\n"
        << "time:"
        << std::setw(25) << std::right << get_time() << "\n";
-    sf::Text info_text = prepare_text(ss.str(), sf::Vector2f(area.left, area.top), 8);
+    sf::Text info_text = prepare_text(ss.str(), sf::Vector2f(area.left, area.top), 10);
     sf::FloatRect bounds = info_text.getLocalBounds();
     info_text.setPosition(area.left + area.width - bounds.width - 10, area.top + area.height - bounds.height);
     m_window.draw(info_text);

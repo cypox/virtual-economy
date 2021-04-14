@@ -47,8 +47,8 @@ public:
 
   void generate_random_world()
   {
-    unsigned n_objects = 10;
-    unsigned n_actors = 100;
+    unsigned n_objects = 4;
+    unsigned n_actors = 8;
 
     m_objects.reserve(n_objects);
     m_produce_consume_rates.reserve(n_objects);
@@ -96,7 +96,7 @@ public:
       act.step(order_list);
     }
 
-    bool end_day = (m_time % 100) == 0;
+    bool end_day = ((1 + m_time) % m_trading_day_length) == 0;
     m_exchange.step(order_list, m_last_transactions, end_day);
     if (end_day)
     {
@@ -257,6 +257,7 @@ private:
   market m_exchange;
   std::queue<transaction> m_last_transactions;
   std::list<transaction> m_last_settled_transactions;
+  unsigned m_trading_day_length = 100;
 
   unsigned m_time = 0;
   long m_iter_microsecs;

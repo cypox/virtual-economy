@@ -16,7 +16,7 @@ class actor {
 public:
   actor() = delete;
 
-  actor(actor_id id, double cash, world<logic>* w) : m_id(id), m_cash(cash), m_remaining_storage(500), m_logic(this, w) { };
+  actor(actor_id id, double cash, world<logic>* w) : m_id(id), m_cash(cash), m_storage_size(500), m_remaining_storage(m_storage_size), m_logic(this, w) { };
 
   actor_id get_id() const
   {
@@ -57,6 +57,52 @@ public:
   void step(order_list& order_list)
   {
     m_logic.take_decision(order_list);
+
+    check_validity();
+  }
+
+  void check_validity() const
+  {
+    bool valid = m_remaining_storage >= 0;
+    valid &= m_reserved_cash >= 0;
+    valid &= m_cash >= 0;
+    
+    size_t total_storage = m_remaining_storage;
+    size_t reserve_storage = 0;
+    for (auto item : m_stock)
+    {
+      valid &= item.second >= 0;
+      total_storage += item.second;
+    }
+
+    for (auto item : m_reserve)
+    {
+      valid &= item.second >= 0;
+      reserve_storage += item.second;
+    }
+
+    valid &= (total_storage + reserve_storage) == m_storage_size;
+
+    double total_buys = m_reserved_cash;
+    size_t total_sells_size = 0;
+    for (auto ord : m_orders)
+    {
+      if (ord.get_type() == order_type::BUY)
+      {
+        total_buys -= ord.get_strike();
+      }
+      else if (ord.get_type() == order_type::SELL)
+      {
+        total_sells_size += ord.get_quantity();
+      }
+    }
+    valid &= total_buys < 1.e-9;
+    valid &= total_sells_size == reserve_storage;
+
+    if (!valid)
+    {
+      throw std::runtime_error("actor is not valid");
+    }
   }
 
   void create(object_id obj, unsigned quantity)
@@ -139,6 +185,10 @@ public:
       m_cash += total_price;
       m_reserved_cash -= total_price;
     }
+    if (m_reserved_cash < 0 or m_reserve[obj] < 0)
+    {
+      throw std::runtime_error("order cancelling went wrong");
+    }
   }
 
   bool execute_buy(object_id obj, unsigned quantity, double price)
@@ -180,6 +230,7 @@ private:
   actor_id m_id;
   double m_cash;
   double m_reserved_cash;
+  size_t m_storage_size;
   size_t m_remaining_storage;
   std::map<object_id, int> m_stock;
   std::map<object_id, int> m_reserve;
