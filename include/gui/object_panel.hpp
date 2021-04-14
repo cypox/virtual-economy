@@ -49,15 +49,17 @@ public:
     double max_price = -INFINITY;
     for (auto it = points.begin() ; it != points.end() ; ++ it)
     {
-      if(*it > max_price)
+      if(it->second > max_price)
       {
-        max_price = *it;
+        max_price = it->second;
       }
-      if(*it < min_price)
+      if(it->second < min_price)
       {
-        min_price = *it;
+        min_price = it->second;
       }
     }
+    min_price -= 5;
+    max_price += 5;
     float x_0 = area.left, y_0 = area.top;
     float x_increment = area.width/(m_graph_width_resolution-1), y_increment = area.height/m_graph_height_resolution;
     int idx = 0;
@@ -65,7 +67,7 @@ public:
     {
       float x1 = area.left + idx * x_increment;
       float x2 = area.left + (idx + 1) * x_increment;
-      float y1 = area.top + area.height - it->second * y_increment;
+      float y1 = area.top + area.height - (((it)->second - min_price) / max_price) * area.height;
       float y2 = area.top + area.height - (((it+1)->second - min_price) / max_price) * area.height;
       sf::Vertex segment[2] = {
         {{x1, y1}, sf::Color::Black},
@@ -81,7 +83,7 @@ public:
     objects_text.setString(ss.str());
     objects_text.setCharacterSize(10);
     objects_text.setFillColor(sf::Color::Red);
-    objects_text.setPosition(area.left + area.width - objects_text.getLocalBounds().width, area.top/2 - objects_text.getLocalBounds().height/2);
+    objects_text.setPosition(area.left + area.width - objects_text.getLocalBounds().width, area.top + area.height/2 - objects_text.getLocalBounds().height/2);
     target.draw(objects_text, states);
   }
 
