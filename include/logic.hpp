@@ -25,7 +25,7 @@ public:
       object_id obj_id = obj.get_id();
 
       bool is_in_need;
-      if (m_is_consuming = obj_id)
+      if (m_is_consuming == obj_id)
       {
         is_in_need = m_actor->destroy(obj_id, m_consumption_rate);
       }
