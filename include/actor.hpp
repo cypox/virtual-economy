@@ -61,11 +61,13 @@ public:
       return 0;
   }
 
-  void step(order_list& order_list)
+  order_list step()
   {
-    m_logic.take_decision(order_list);
+    order_list ol;
+    m_logic.take_decision(ol);
 
     check_validity();
+    return ol;
   }
 
   void check_validity() const
@@ -76,13 +78,13 @@ public:
     
     size_t total_storage = m_remaining_storage;
     size_t reserve_storage = 0;
-    for (auto item : m_stock)
+    for (auto& item : m_stock)
     {
       valid &= item.second >= 0;
       total_storage += item.second;
     }
 
-    for (auto item : m_reserve)
+    for (auto& item : m_reserve)
     {
       valid &= item.second >= 0;
       reserve_storage += item.second;
@@ -92,7 +94,7 @@ public:
 
     double total_buys = m_reserved_cash;
     size_t total_sells_size = 0;
-    for (auto ord : m_orders_copy)
+    for (auto& ord : m_orders_copy)
     {
       if (ord.get_type() == order_type::BUY)
       {

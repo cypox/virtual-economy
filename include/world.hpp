@@ -9,6 +9,7 @@
 #include <list>
 #include <random>
 #include <limits>
+#include <future>
 #include <mutex>
 #include <sys/time.h>
 
@@ -89,15 +90,25 @@ public:
     struct timeval start, end;
     gettimeofday(&start, nullptr);
 
-    order_list order_list;
+    order_list orders;
 
-    for (actor_t act : m_actors)
+    std::vector<std::future<order_list>> tasks;
+    for (actor_t& act : m_actors)
     {
-      act.step(order_list);
+      //tasks.emplace_back([&](){act.step();});
+      order_list ol = act.step();
+      orders.insert(ol.begin(), ol.end());
     }
+    /*
+    for(auto &t : tasks)
+    {
+      order_list ol = t.get();
+      orders.insert(ol.begin(), ol.end());
+    }
+    */
 
     bool end_day = ((1 + m_time) % m_trading_day_length) == 0;
-    m_exchange.step(order_list, m_last_transactions, end_day);
+    m_exchange.step(orders, m_last_transactions, end_day);
     if (end_day)
     {
       for (actor_t& act : m_actors)
