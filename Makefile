@@ -3,7 +3,7 @@ CFLAGS = -std=c++2a
 DEBUG = -g -O0
 SRC_DIR = src
 INC_DIR = .
-SFML_LIBS = -lsfml-graphics -lsfml-window -lsfml-system
+SFML_LIBS = -lsfml-graphics -lsfml-window -lsfml-system -lpthread
 
 # These files compile via implicit rules
 veco: ${SRC_DIR}/veco.cpp
