@@ -5,3 +5,7 @@
 ```bash
 valgrind --tool=callgrind ./veco --no-stepping --start-running
 ```
+
+# GUI
+
+![alt text](https://https://github.com/cypox/virtual-economy/blob/[branch]/example.png?raw=true)
