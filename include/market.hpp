@@ -32,6 +32,8 @@ public:
       for (int i = 0 ; i < m_execution_rate && !m_order_queue.empty() ; ++ i)
       {
         order to_satisfy = m_order_queue.front();
+        // TODO: check if the order is not satisfied before popping
+        // if the order cannot be satisfied, it should be returned to the queue
         m_order_queue.pop();
         tr_list.push(process_single_order(to_satisfy));
       }
