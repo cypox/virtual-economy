@@ -76,6 +76,7 @@ public:
       seller = to_satisfy.get_actor_id();
       buyer = second_order.get_actor_id();
     }
+    // TODO: the price is not second_order.get_strike but the price asked for by the seller (not buying for more than I can pay)
     return transaction(buyer, seller, second_order.get_object_id(), second_order.get_quantity(), second_order.get_strike());
   }
 
@@ -92,6 +93,7 @@ public:
       auto it = market_orders.begin();
       while(it != market_orders.end())
       {
+        // TODO: use a priority queue or a more efficient structure for retrieving the min
         const order current_order = *it;
         if (current_order.get_strike() <= to_satisfy.get_strike())
         {
@@ -109,6 +111,7 @@ public:
       auto it = market_orders.rbegin();
       while(it != market_orders.rend())
       {
+        // TODO: use a priority queue or a more efficient structure for retrieving the min
         const order current_order = *it;
         if (current_order.get_strike() >= to_satisfy.get_strike())
         {
